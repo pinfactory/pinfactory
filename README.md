@@ -49,7 +49,6 @@ by the University of Nebraska at Omaha Libraries'
 Open Access Fund.
 
 
-
 ## Prices and quantities
 
 All prices are expressed as the price of the
@@ -59,8 +58,8 @@ in the range 0 to 1, which translates nicely into
 getting fixed is P." Internally prices are stored as
 integers, 0 to 1000.
 
-Account balances are stored as millitokens (1000x
-the amount shown in the UI).
+Internally, account balances are stored as millitokens
+(1000x the amount shown in the UI).
 
 Offer and contract quantities (in the "offer"
 and "position" tables) are stored as numbers of
@@ -150,7 +149,9 @@ to jump.  For example, to jump 2 weeks:
 
     ./timejump 14
 
-This will stop and start 
+This will stop and start the demo database.  Time
+jumps do not work in the production environment
+where the database is run under systemd.
 
 
 ## clean up Docker containers and images
@@ -191,9 +192,9 @@ all the other images.
 
  * loginpass: Wrapper for OAuth, with support for GitHub.
 
- * Vega: front end visualizations
-
  * WTForms: Form building and validation package with CSRF protection
+
+**Vega: front end visualizations**
 
 
 # Third parties
