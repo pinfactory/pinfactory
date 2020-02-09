@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+    <div class="row"><div class="col-md-12">
+    	<h1>All issues in the market</h1>
+    </div></div>
+
+    <div class="row">
+	<div class="col-md-12">
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              <th>Last activity</th>
+	      <th>Project</th>
+	      <th>Issue number</th>
+	      <th>Offers total</th>
+	      <th>Description</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+{% for issue in issues %}
+		<tr{% if not issue.is_open %} class="text-muted"{% endif %}>
+		  <td>{{ issue.datetime }}</td>
+		  <td>{{ issue.projectname }}</td>
+  		  <td>{% if not issue.is_open %}<s>{% endif %} 		  
+		  	<a target="_blank" href="{{ issue.url }}">{{ issue.issuenumber }}
+		  {% if not issue.is_open %}</s>{% endif %} 
+		  </a></td>
+		  <td>{% if issue.offer_volume %}
+		  	{{ issue.offer_volume }}
+		  {% endif %}</td>
+  		  <td>{{ issue.displayname }}</td>
+		  <td><a class="btn btn-primary" href="/issue/{{ issue.id }}">Details</a></td>
+		</tr>
+{% endfor %}
+	</tbody></table>
+</div></div></div>
+
+{% endblock %}
+<!-- vim: autoindent textwidth=100 shiftwidth=4 expandtab softtabstop=4 filetype=html
+-->

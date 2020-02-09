@@ -1,0 +1,43 @@
+<div class="row"><div class="col-md-12">
+    <div class="table-responsive"><table class="table table-striped table-sm">
+        <thead><tr>
+            <th><!-- Misc info -->&nbsp;</th>				
+            <th>Maturation date</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total Price</th>
+            <th>Actions</th>
+            </tr></thead>
+        <tbody>
+            {% for contract in contracts %}<tr>
+				<td><!-- -->
+                <b>{{ contract.displayside }}</b>
+				{% if not hide_issue %}
+				Contract for issue {{ contract.contract_type.issue.issuenumber }}
+				<br>{{ contract.contract_type.issue }}
+				<br><a href="/issue/{{ contract.contract_type.issue.id }}">(marketplace)</a>
+                <a href="{{ contract.contract_type.issue.url }}" target="_blank">(GitHub)</a>
+				{% endif %}
+                <br><b>Created:</b> {{ contract.datetime }}</td>
+
+				<td>{{ contract.contract_type.maturity.display }}</td>
+				<td>{{ contract.displayquantity }}</td>
+
+				<td class="nobr">{{ contract.displayprice }} (FIXED side)
+                <br>{{ contract.display_unfixed_price }} (UNFIXED side)</td>
+				<td class="nobr">{{ contract.display_total_price }} (FIXED side)
+                <br>{{ contract.display_total_unfixed_price }} (UNFIXED side)</td>
+
+                {% if true %}<td><form method="POST" action="{{ url_for('offset') }}" class="form" role="form">
+                		 Enter a price to offer to resell your entire position.
+                         <br>{{ contract.offset_form.position }}
+						 {{ contract.offset_form.price(size=5) }}
+                		 {{ contract.offset_form.submit }}
+           		 </form></td>{% endif %}
+			</tr>{% endfor %}
+        </tbody></table></div>
+    </div>
+</div>
+
+<!-- vim: autoindent textwidth=100 shiftwidth=4 expandtab softtabstop=4 filetype=html
+-->

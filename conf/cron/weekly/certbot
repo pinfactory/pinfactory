@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# certbot 
+# This file goes in /etc/cron-weekly/certbot
+
+set -e
+/usr/bin/certbot --non-interactive renew
+exit 0

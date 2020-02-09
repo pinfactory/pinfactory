@@ -1,0 +1,7 @@
+language: python
+
+services:
+  - docker
+
+script:
+  - /bin/bash test.sh

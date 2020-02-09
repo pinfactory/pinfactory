@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <div class="row">
+	{% if contract_types %}
+    	<h1>These are contract types that need to be resolved.</h1>
+	{% else %}
+		<h1>No contract types need to be resolved.</h1>
+	{% endif %}
+    </div>
+
+	<div class="row">
+        <div class="col-md-12">
+			<div class="table-responsive"><table class="table table-striped table-sm">
+          		<thead><tr>
+              		<th>Maturation date</th>
+                    <th>Issue number</th>
+					<th>Description</th>
+              		<th>&nbsp;</th>
+            	</tr></thead>
+          		<tbody>
+
+    {% for contract_type in contract_types %}<tr>
+    	<td>{{ contract_type.maturity.display }}</td>
+		<td><a href="{{ contract_type.issue.url }}" target="_blank">{{ contract_type.issue.issuenumber }}</a></td>
+		<td><a href="/issue/{{ contract_type.issue.id }}" target="_blank">{{ contract_type.issue }}</a><td>
+	    <form id="resolveForm_{{contract_type.id}}" method="POST" action="{{url_for('resolve')}}" class="form" role="form">
+            {{ contract_type.resolve_form.contract_type }}
+            {{ contract_type.resolve_form.issue }}
+            {{ contract_type.resolve_form.maturity }}
+            {{ contract_type.resolve_form.side }}
+            {{ contract_type.resolve_form.submit }}
+	    </form>
+        </td>
+    </tr>{% endfor %}
+
+        </tbody></table>
+
+</div></div></div>
+{% endblock %}
+
+
+<!-- 
+vim: autoindent textwidth=100 tabstop=4 shiftwidth=4 filetype=html
+-->

@@ -1,0 +1,65 @@
+<!-- begin include offer-form -->
+<form id="offerForm" method="POST" action="{{url_for('offer')}}" class="form" role="form">
+	{{ form.csrf_token }}
+	{{ form.issue }}
+	{% if form.show_errors and form.errors %}
+		<ul class="errors">
+			{% for field_name, field_errors in form.errors|dictsort if field_errors %}
+				{% for error in field_errors %}
+					<li>{{ form[field_name].label }}: {{ error }}</li>
+				{% endfor %}
+			{% endfor %}
+		</ul>
+	{% endif %}
+
+    <table width="100%"><tr><td>
+        <h3>Create offer to <select id="fund-fix">
+            <option value="">Select FUND or FIX</option>
+            <option value="FIXED">FIX</option>
+            <option value="UNFIXED">FUND</option>
+        </select>
+        <a style="color: black; text-decoration: none" href="/issue/{{issue.id}}" target="_blank">issue {{ issue.issuenumber }}</a></p>
+
+    </td></tr></table>
+
+    <table>
+        <tr><td id="fixer-before-label">Reward to worker</td><td><input id="funder-pays" size=5></td>
+            <td id="fixer-after-label">(if fixed)</td></tr>
+        <tr><td id="funder-before-label">Indemnity to be paid to funder</td><td><input id="worker-pays" size=5></td>
+            <td id="funder-after-label">(if unfixed)</td></tr>
+        <tr><td>Contract payout</td><td><input readonly="readonly" id="contract-payout" size=5></td><td></td></tr>
+    </table>
+
+    <table width="100%">
+        <tr><th colspan="2">Matures on</th><th>&nbsp;</th></tr>
+        <tr><td colspan="2">
+            {% for maturity in maturities %}
+            <button id="maturity-{{ maturity.id }}" type="button" title="{{ maturity.display }}"
+                    class="btn btn-primary">{{ maturity.display }}</button>
+            {% endfor %}
+        </td>
+        <td align="right">
+             <button type="button" id="show-advanced" class="btn btn-secondary" onClick="showAdvanced();">Show advanced</a>
+             <button type="button" id="hide-advanced" class="btn btn-secondary" style="display: none" onClick="hideAdvanced();">Hide advanced</a>
+        </td></tr>
+    </table>
+
+    <p id="advanced" style="margin-top: 0.5ex; min-height: 5ex; visibility: hidden">(The offer is
+    for {{ form.quantity(size=3) }} units of {{ form.side }} at a price of {{ form.price(size=3) }}
+    with a maturation date of {{ form.maturitydate(size=5) }} {{ form.maturity }}.  Estimated fee: <input id="fee" readonly="readonly" size="3"></input>.)</p>
+
+    <div id="win-loss-explain"><p>If this issue is <span id="other-side-dup">resolved as a loss</span> on <b id="maturity-dup-1">the maturation date</b>: You will lose your payment of <input id="detail-invest" readonly="readonly" size="4"></input> tokens.</p>
+
+    <p>If this issue is <span id="this-side-dup">resolved as a win</span> on <b id="maturity-dup-2">the maturation date</b>: You will receive
+    the contract payout, which reflects a transaction
+    fee of <input id="detail-fee" readonly="readonly" size="3"></input> tokens, calculated based on 
+    10% of your anticipted profit.</p></div>
+
+    <p>
+        {{ form.submit(class_="btn btn-primary btn-lg") }}
+    </p>
+
+</form><!-- end include offer-form -->
+
+<!-- vim: autoindent textwidth=100 shiftwidth=4 expandtab softtabstop=4 filetype=html
+-->

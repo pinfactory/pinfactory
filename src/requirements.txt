@@ -1,0 +1,10 @@
+altair
+flask
+flask-bootstrap
+flask-wtf
+Authlib
+loginpass
+pandas
+pip >= 7.1.0
+psycopg2 >= 2.5
+requests

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Run the market clean script to cancel offers after maturity date.
+
+set -e
+set -u
+
+/srv/market/cleanup.py

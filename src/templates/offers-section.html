@@ -1,0 +1,50 @@
+<div class="row">
+	<div class="col-md-12">
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+				<th>&nbsp;</th>
+              <th>Date {% if issue %}offer{% endif %} placed</th>
+			  <th>Position</th>
+			  <th>Price</th>
+			  <th>Quantity</th>
+			  {% if not hide_issue %}
+			  <th>Issue number</th>
+			  <th>Issue description</th>
+			  {% endif %}
+			  <th>Maturation date</th>
+              <th>&nbsp;</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+{% for offer in offers %}
+	{% if (not show_mine_only) or (offer.account == user) %}
+			<tr id="offer-{{offer.id}}">
+				<td>{% if offer.account == user %}
+					<span class="my-offer-dot">●</a>
+				{% endif %}</td>
+				<td>{{ offer.datetime }}</td>
+				<td>{{ offer.displayside }}</td>
+				<td>{{ offer.displayprice }} </td>
+				<td>{{ offer.quantity }}</td>
+				{% if not hide_issue %}
+				<td><a href="{{ offer.contract_type.issue.url }}" target="_blank">{{ offer.contract_type.issue.issuenumber }}</a></td>
+				<td><a href="/issue/{{ offer.contract_type.issue.id }}">{{ offer.contract_type.issue.displayname }}</a></td>
+				{% endif %}
+				<td>{{ offer.contract_type.maturity.display }}</td>
+				<td><form method="POST" action="{{ url_for('cancel') }}" class="form" role="form">
+                		{{ offer.cancel_button.offer }}
+                		{{ offer.cancel_button.submit }}
+            	</form></td>
+
+                <td><form method="POST" action="{{ url_for('match') }}" class="form" role="form">
+                		{{ offer.match_button.offer }}
+                		{{ offer.match_button.submit }}
+           		</form></td>
+			</tr>
+	{% endif %}
+{% endfor %}
+	</tbody></table>
+</div></div></div>
