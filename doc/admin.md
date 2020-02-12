@@ -107,3 +107,6 @@ References
 
 [Webhooks | GitHub Developer Guide](https://developer.github.com/webhooks/)
 
+[Basics of Authentication | GitHub Developer Guide](https://developer.github.com/v3/guides/basics-of-authentication/)
+
+
