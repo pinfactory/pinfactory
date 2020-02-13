@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Start two Firefox browsers with different profiles
+# Start multiple Firefox browsers with different profiles
 # for a web demo.
 
 # Always run this script from its own directory
