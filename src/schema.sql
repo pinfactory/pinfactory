@@ -1,17 +1,25 @@
-CREATE OR REPLACE FUNCTION update_modified_column()   
+--SQL database functions. These are only run when we deploy first time to populate
+--the database. Triggers are the exception -- they run whenever a change happens.
+--It is run when db_setup.sh is called (from restart.sh).
+
+--Database trigger: Keeps column called modified set to time and date at the
+--current time of calling this function.
+--NEW is a database record holding the info we are updating.
+CREATE OR REPLACE FUNCTION update_modified_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.modified = NOW();
-    RETURN NEW;   
+    RETURN NEW;
 END;
 $$ language 'plpgsql';
 
 -- Do not allow an offer to be made after the contract matures.
-CREATE OR REPLACE FUNCTION check_contract_type_maturity()   
+-- Declaring not_after as a variable of type TIMESTAMP
+CREATE OR REPLACE FUNCTION check_contract_type_maturity()
 RETURNS TRIGGER AS $$
-	DECLARE 
+	DECLARE
 		not_after TIMESTAMP;
-BEGIN	
+BEGIN
 	SELECT maturity.matures INTO not_after FROM contract_type JOIN maturity ON contract_type.matures = maturity.id
 		WHERE contract_type.id = NEW.contract_type;
 	IF NOW() > not_after THEN
@@ -35,6 +43,9 @@ CREATE TABLE IF NOT EXISTS account (
 
 -- User identifiers.  The "sub" column is the unique
 -- identifer from the OAuth host.
+-- Contains the info to get you logged in. And a pointer to your account.
+-- Multiple user ids (say you log in with different ids) can reference the same
+-- account.
 DO $$ BEGIN
 	CREATE TYPE host_class AS ENUM ('GitHub', 'local');
 EXCEPTION
@@ -52,7 +63,7 @@ CREATE TABLE IF NOT EXISTS userid (
 	UNIQUE (host, profile)
 );
 
--- issues on which trades can be made
+-- issues (on which trades can be made)
 CREATE TABLE IF NOT EXISTS issue (
 	id SERIAL PRIMARY KEY,
 	url TEXT UNIQUE NOT NULL,
@@ -64,10 +75,14 @@ CREATE TABLE IF NOT EXISTS issue (
 	open BOOLEAN NOT NULL DEFAULT true,
 	fixed BOOLEAN NOT NULL DEFAULT false /* used to resolve contracts */
 );
+
+-- A trigger is a procedure that runs inside the database when a certain query
+-- happens. Here update modified.
 DROP TRIGGER IF EXISTS update_issue_modified ON issue;
 CREATE TRIGGER update_issue_modified BEFORE UPDATE ON issue FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
 
 -- possible expiration dates for a contract
+-- enforces maturity dates that are already in the database
 CREATE TABLE IF NOT EXISTS maturity (
 	id SERIAL PRIMARY KEY,
 	matures TIMESTAMP NOT NULL UNIQUE
@@ -95,7 +110,8 @@ CREATE TABLE IF NOT EXISTS offer (
 DROP TRIGGER IF EXISTS check_offer_date ON offer;
 CREATE TRIGGER check_offer_date BEFORE INSERT ON offer FOR EACH ROW EXECUTE PROCEDURE check_contract_type_maturity();
 
--- view on offers. Used in several related queries.
+-- view on offers. Used in several related queries. Lets us select from this
+-- view at the application level since this is a view used often.
 DROP VIEW IF EXISTS offer_overview;
 CREATE VIEW offer_overview AS
 	SELECT maturity.id AS maturity, maturity.matures,
@@ -108,6 +124,10 @@ CREATE VIEW offer_overview AS
 
 -- positions held.  Cannot be cancelled, but can be
 -- offset by taking the other side.
+-- modified refers to selling out or offsetting part of your position, thus it
+-- relates to the number of units modified.
+-- basis refers to the original price of this position (need to store this to
+-- calculate the oracle fee)
 CREATE TABLE IF NOT EXISTS position (
 	id SERIAL PRIMARY KEY,
 	account INT REFERENCES account(id),
@@ -115,7 +135,7 @@ CREATE TABLE IF NOT EXISTS position (
 	modified TIMESTAMP NOT NULL DEFAULT NOW(),
 	contract_type INT REFERENCES contract_type(id),
 	basis BIGINT NOT NULL CHECK (basis >= 0),       /* cost basis for this position in millitokens */
-	quantity BIGINT NOT NULL CHECK (quantity != 0), /* units, worth 1000 millitokens to the winner * 
+	quantity BIGINT NOT NULL CHECK (quantity != 0), /* units, worth 1000 millitokens to the winner *
 							 * positive: FIXED.                            *
 							 * negative: UNFIXED.                          */
 	UNIQUE (account, contract_type)
@@ -126,6 +146,7 @@ DROP TRIGGER IF EXISTS update_position_modified ON position;
 CREATE TRIGGER update_position_modified BEFORE UPDATE ON position FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
 
 -- messages
+-- message class enumerates the different kinds of messages.
 DO $$ BEGIN
 	CREATE TYPE message_class AS ENUM('system', 'info', 'offer_created', 'offer_cancelled',
 				          'contract_created', 'position_covered', 'contract_resolved',
@@ -147,11 +168,15 @@ CREATE TABLE IF NOT EXISTS message (
 );
 
 -- For populating messages
+-- Note: table is actually persisted to the database. Tables are concepts that
+-- have integrity with correctness checks, normalized, etc. A view is a convenient
+-- query of the database that brings together a bunch of info that is typically
+-- needed together.
 DROP VIEW IF EXISTS message_overview;
 CREATE VIEW message_overview AS
 	SELECT maturity.id AS maturity, maturity.matures,
 	issue.id AS issue, issue.url, issue.title,
-	message.id, message.class, message.created, message.delivered, message.recipient, message.contract_type, 
+	message.id, message.class, message.created, message.delivered, message.recipient, message.contract_type,
 	message.side, message.price, message.quantity, message.message
 	FROM message LEFT OUTER JOIN contract_type ON contract_type.id = message.contract_type
 	LEFT OUTER JOIN maturity ON maturity.id = contract_type.matures
@@ -174,7 +199,7 @@ INSERT INTO account (system, balance) SELECT true, 0
 	WHERE NOT EXISTS ( SELECT id FROM account WHERE system = true);
 
 -- all done
-INSERT INTO message (class, recipient, message) 
+INSERT INTO message (class, recipient, message)
 	VALUES ('system', (SELECT id FROM account WHERE system = true),
 	'Database setup run.');
 
