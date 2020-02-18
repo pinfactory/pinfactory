@@ -3,13 +3,14 @@
 import collections
 import logging
 
+# from the file, import the class
 from issue import Issue
 from contract import ContractType
 from maturity import Maturity
 
 class Message(object):
     def __init__(self, mclass, account=None, contract_type=None,
-                 side=None, price=None, quantity=None, 
+                 side=None, price=None, quantity=None,
                  offer=None, contract=None, text=None, created=None,
                  mid=None):
         self.id = mid
@@ -25,6 +26,7 @@ class Message(object):
         self.created = created
 
     @property
+    # converting price to tokens from millitokens (for display)
     def displayprice(self):
         return "%.3f" % (self.price/1000)
 
@@ -44,6 +46,10 @@ class Message(object):
             all_accounts = True
 
         result = []
+        # Cursor object for the database driver. Database can have different
+        # queries. curs points to this particular query. curs.execute runs a
+        # SQL statement that you pass to the database. The result of this
+        # execution can then be "fetched".
         with cls.db.conn.cursor() as curs:
             curs.execute('''SELECT issue, url, title, maturity, matures,
                             id, class, created,
@@ -74,7 +80,8 @@ class Message(object):
             return result
 
     # send takes a cursor because Messages are only sent as the result of
-    # a transaction.  Send does not commit the transaction.
+    # a transaction.  Send does not commit the transaction. The message is only
+    # sent when a transaction goes through.
     def send(self, curs, log=False):
         if self.account is None:
             curs.execute("SELECT id FROM account WHERE system = true")
@@ -93,6 +100,7 @@ class Message(object):
         return self
 
     @property
+    # time when the message was generated.
     def datetime(self):
         return self.created.strftime("%d %b %H:%M")
 
@@ -137,6 +145,9 @@ class Message(object):
     def __str__(self):
         return self.__repr__()
 
+# Convenient class to handle a list of messages. For example, when a contract is
+# being created, a number of messages need to be sent. Message list allows us
+# to build up a list of messages and send them.
 class MessageList(collections.UserList):
     def __init__(self, market=None):
         self.market = market
@@ -169,4 +180,3 @@ class MessageList(collections.UserList):
 
     def __repr__(self):
         return ', '.join(repr(m) for m in self)
-
