@@ -151,6 +151,7 @@ class Account(object):
             acct = cls.get_by_oauth(curs, host, sub, db)
             if acct is None:
                 if username is None or profile is None:
+                    logging.warning("No username or profile for %s" % sub)
                     return None
                 acct = cls(host=host, sub=sub, username=username, profile=profile)
                 acct.persist(db)
