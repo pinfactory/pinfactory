@@ -88,7 +88,8 @@ CREATE TABLE IF NOT EXISTS maturity (
 	matures TIMESTAMP NOT NULL UNIQUE
 );
 
--- a contract type has an issue and an expiration date
+-- a contract type has an issue and an expiration date (maturity id). Can only
+-- point to issues and maturity ids that exist. Table is created but not yet populated.
 CREATE TABLE IF NOT EXISTS contract_type (
 	id SERIAL PRIMARY KEY,
 	issue INT REFERENCES issue(id),
@@ -112,6 +113,9 @@ CREATE TRIGGER check_offer_date BEFORE INSERT ON offer FOR EACH ROW EXECUTE PROC
 
 -- view on offers. Used in several related queries. Lets us select from this
 -- view at the application level since this is a view used often.
+-- maturity and issue objects exist in their own tables. Here in this view we join
+-- that info with contract. Note that contract_type table just references the
+-- ids but here we need more info from the maturity and issue objects.
 DROP VIEW IF EXISTS offer_overview;
 CREATE VIEW offer_overview AS
 	SELECT maturity.id AS maturity, maturity.matures,
@@ -128,6 +132,9 @@ CREATE VIEW offer_overview AS
 -- relates to the number of units modified.
 -- basis refers to the original price of this position (need to store this to
 -- calculate the oracle fee)
+--An account can only have one position given a contract type. However a contract_type
+--can have multiple different accounts, for a given position. In the UI these
+--are displayed as different offers/contracts (equivalent to piling on). 
 CREATE TABLE IF NOT EXISTS position (
 	id SERIAL PRIMARY KEY,
 	account INT REFERENCES account(id),
