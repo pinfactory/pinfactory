@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+#Contract object is the external view where we keep track of forming the contract
+#and position is how it gets persisted in the database (internal view).
+
 import logging
 
 import psycopg2
@@ -28,6 +31,9 @@ class Contract(object):
         if not self.contract_type.id:
             raise NotImplementedError
 
+#Python: how to describe your object as a line of text. price is the price of
+#the fixed side. Refund is tricky -- depends on whether you have taken an
+#offsetting position.
     def __repr__(self):
         return ("fixed refund: %s unfixed refund: %s" % (self.fixed_refund, self.unfixed_refund))
 
@@ -45,6 +51,12 @@ class Contract(object):
             refund_units = min(abs(old_q), abs(new_contract))
         return (new_q, refund_units)
 
+#Sign of the quantity variable determines which side: positive is fixed and
+#negative is unfixed. Once the contract object is persisted to the Database
+#that contract object does not exist anymore, we just store positions internally.
+#basis keeps track of what price you paid for what position. Any offsetting
+#is taken care of here. Resolve simply resolves what exists and does not
+#care about history.
     def persist_side(self, contract_type, acct, pos_price, quantity, curs):
         '''
         Store one side of a contract.
@@ -118,7 +130,7 @@ class ContractType(object):
             curs.execute('''SELECT DISTINCT maturity.matures, maturity.id, issue.url, issue.title, issue.id, contract_type.id
                             FROM maturity JOIN contract_type on maturity.id = contract_type.matures
                             JOIN issue ON issue.id = contract_type.issue
-                            JOIN position ON contract_type.id = position.contract_type 
+                            JOIN position ON contract_type.id = position.contract_type
                             WHERE maturity.matures < NOW()
                             ORDER BY maturity.matures''')
             for row in curs.fetchall():
@@ -132,7 +144,7 @@ class ContractType(object):
     def lookup(cls, iid, mid):
         with cls.db.conn.cursor() as curs:
             curs.execute('''INSERT INTO contract_type (issue, matures) VALUES (%s, %s)
-                            ON CONFLICT (issue, matures) DO UPDATE set matures = %s RETURNING id''', 
+                            ON CONFLICT (issue, matures) DO UPDATE set matures = %s RETURNING id''',
                             (iid, mid, mid))
             cid = curs.fetchone()[0]
             curs.execute('''SELECT maturity.matures, issue.url, issue.title
@@ -210,4 +222,3 @@ class ContractType(object):
         return result
 
 # vim: autoindent textwidth=100 tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
-

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+#Issue closed means that the issue is fixed. Issue open means that its status
+#remains unfixed even though there may be contracts/positions on the issue. Anyone
+#else can still bid on it.
+
 from datetime import timedelta
 
 import psycopg2
@@ -28,6 +32,8 @@ class Issue(object):
     def datetime(self):
         return self.modified.strftime("%d %b %H:%M")
 
+#Return issue name or issue number within project name or just url.
+#Array parts[] assumes github convention to handle issue urls.
     @property
     def displayname(self):
         if self.title is not None:
@@ -54,12 +60,16 @@ class Issue(object):
         except:
             return 0
 
+#Locking out simple-market from public view.
     @property
     def is_public(self):
         if self.projectname == 'simple-market':
             return False
         return True
 
+#Writes the status of an issue to the database. xmax resolves the ON CONFLICT
+#statement in Postgres: logs whether the issue is created or updated.
+#The value of xmax is placed in "inserted".
     def persist(self, db):
         self.db = db
         with db.conn.cursor() as curs:
@@ -115,6 +125,8 @@ class Issue(object):
     def by_url(cls, db, url, title=None, is_open=True):
         return cls(url=url, title=title, is_open=is_open).persist(db)
 
+#Any issue that has been around for 4 weeks and has no trading history gets cleaned
+#up. 
     @classmethod
     def cleanup(cls, db):
         expired = []
@@ -130,4 +142,3 @@ class Issue(object):
                     db.conn.commit()
             except psycopg2.errors.ForeignKeyViolation:
                 db.conn.rollback()
-
