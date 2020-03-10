@@ -95,7 +95,7 @@ Log in with GitHub
 
 "Authorization callback URL" should be:
 
-https://market.pinfactory.ca/github/auth
+https://market.pinfactory.org/github/auth
 
 
 References

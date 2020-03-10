@@ -1,14 +1,14 @@
-#This shell script is called at the prompt when starting the application via the
-#command line. This script uses Docker which is pertinent for running from a
-#personal computer. The platform running on market.pinfactory.ca is started with
-#deploy.sh and restart.sh, as it does not use a Docker container (it uses up
-#the entire server -- don't need an extra layer of Docker there).
-
 #!/bin/bash
+
+# This shell script is called at the prompt when starting the application demo from the 
+# command line. This script uses Docker which is pertinent for running from a
+# personal computer. The platform running on market.pinfactory.org is started with
+# deploy.sh and restart.sh, as it does not use a Docker container (it uses up
+# the entire server -- don't need an extra layer of Docker there).
 
 #Datasource: where to ssh to get our data? Ensure we are in the same directory
 #where the script lives.
-DATASOURCE=market@market.pinfactory.ca
+DATASOURCE=market@market.pinfactory.org
 
 trap popd EXIT
 pushd $PWD &> /dev/null

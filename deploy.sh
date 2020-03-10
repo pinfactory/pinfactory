@@ -13,7 +13,7 @@ trap 'cleanup' EXIT
 pushd $PWD
 cd $(dirname "$0")
 
-HOST=market.pinfactory.ca
+HOST=market.pinfactory.org
 USER=market
 DOCROOT=/srv/market
 
