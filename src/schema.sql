@@ -106,7 +106,8 @@ CREATE TABLE IF NOT EXISTS offer (
 	contract_type INT REFERENCES contract_type(id),
 	side BOOLEAN NOT NULL, /* true fixed false unfixed */
 	price BIGINT NOT NULL CHECK (price >= 0 AND price <= 1000), /* price of the "fixed" side in millitokens */
-	quantity BIGINT NOT NULL CHECK (quantity > 0) /* units, worth 1000 millitokens to the winner */
+	quantity BIGINT NOT NULL CHECK (quantity > 0), /* units, worth 1000 millitokens to the winner */
+	all_or_nothing BOOL NOT NULL DEFAULT false
 );
 DROP TRIGGER IF EXISTS check_offer_date ON offer;
 CREATE TRIGGER check_offer_date BEFORE INSERT ON offer FOR EACH ROW EXECUTE PROCEDURE check_contract_type_maturity();
@@ -121,7 +122,7 @@ CREATE VIEW offer_overview AS
 	SELECT maturity.id AS maturity, maturity.matures,
 	contract_type.id AS contract_type,
 	issue.id AS issue, issue.url, issue.title,
-	offer.id, offer.account AS account, offer.side, offer.price, offer.quantity, offer.created
+	offer.id, offer.account AS account, offer.side, offer.price, offer.quantity, offer.created, offer.all_or_nothing
 	FROM maturity JOIN contract_type ON maturity.id = contract_type.matures
 	INNER JOIN issue ON issue.id = contract_type.issue
 	INNER JOIN offer ON contract_type.id = offer.contract_type;

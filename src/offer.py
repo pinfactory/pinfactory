@@ -15,16 +15,18 @@ class Offer(object):
         '''Reduce the quantity of an existing offer (an argument of None is
            treated as the amount of the offer.)  Return the tokens to the
            account. Delete the offer if reduced to zero.'''
-        curs.execute("SELECT account, price, side, quantity FROM offer WHERE id = %s", (i,))
+        curs.execute("SELECT account, price, side, quantity, all_or_nothing FROM offer WHERE id = %s", (i,))
         if curs.rowcount != 1:
             raise RuntimeError
-        (a, p, s, q) = curs.fetchone()
+        (a, p, s, q, aon) = curs.fetchone()
         if q_to_remove is None:
             q_to_remove = q
         if q_to_remove <= 0:
             raise RuntimeError
         if q_to_remove > q:
             raise RuntimeError
+        if aon and q_to_remove < q: 
+            raise RuntimeError("All or nothing offers cannot be reduced, only removed entirely")
         if s: # FIXED
             total = p * q_to_remove
         else: # UNFIXED
@@ -54,20 +56,20 @@ class Offer(object):
         if con.unfixed_refund:
             self.db.messages.add('position_covered', unfixed_holder, contract_type, quantity=con.unfixed_refund, contract=con)
 
-    def make_offer(self, curs, account, contract_type, side, price, quantity):
+    def make_offer(self, curs, account, contract_type, side, price, quantity, all_or_nothing):
         if side == self.db.UNFIXED:
             total = (1000 - price) * quantity
         else:
             total = price * quantity
         curs.execute("UPDATE account SET balance = balance - %s WHERE id = %s",
             (total, account))
-        curs.execute("""INSERT INTO offer (account, contract_type, side, price, quantity)
-            VALUES (%s, %s, %s, %s, %s) RETURNING id""",
-            (account, contract_type.id, side, price, quantity))
+        curs.execute("""INSERT INTO offer (account, contract_type, side, price, quantity, all_or_nothing)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",
+            (account, contract_type.id, side, price, quantity, all_or_nothing))
         self.id = curs.fetchone()[0]
         self.db.messages.add('offer_created', account, contract_type, side, price, quantity, offer=self)
 
-    def __init__(self, account, contract_type, side, price, quantity, oid=None, created=None):
+    def __init__(self, account, contract_type, side, price, quantity, oid=None, created=None, all_or_nothing=False):
         self.id = oid
         self.account = account
         self.contract_type = contract_type
@@ -75,6 +77,7 @@ class Offer(object):
         self.price = price
         self.quantity = quantity
         self.created = created
+        self.all_or_nothing = all_or_nothing
         if not self.contract_type.id:
             raise NotImplementedError
 
@@ -87,13 +90,19 @@ class Offer(object):
         if self.contract_type != other.contract_type:
             logging.debug ("%s doesn't match %s" % (self.contract_type, other.contract_type))
             return False
+        if self.all_or_nothing != other.all_or_nothing:
+            logging.debug ("%s doesn't match %s" % (self.contract_type, other.contract_type)) 
+            return false
         return self.side == other.side and self.price == other.price and self.quantity == other.quantity
 
     def __repr__(self):
         which = "UNFIXED"
         if self.side:
             which = "FIXED"
-        return "%s Offer for %d units at %.3f on %s" % (which, self.quantity, self.price/1000, self.contract_type)
+        aon = ''
+        if self.all_or_nothing:
+            aon = " (all or nothing)"
+        return "%s Offer for %d units at %.3f on %s%s" % (which, self.quantity, self.price/1000, self.contract_type, aon)
 
     @classmethod
     def by_id(cls, oid):
@@ -124,21 +133,22 @@ class Offer(object):
             curs.execute('''SELECT account,
                             maturity, matures,
                             contract_type, issue, url, title,
-                            side, price, quantity, id, created
+                            side, price, quantity, id, created, 
+                            all_or_nothing
                             FROM offer_overview WHERE 
                             (id = %s OR %s) AND
                             (account = %s OR %s) AND
                             (issue = %s OR %s)
                             ''', (oid, all_ids, uid, all_accounts, iid, all_issues))
             for row in curs.fetchall():
-                (uid, mid, matures, cid, iid, url, title, side, price, quantity, oid, created) = row
+                (uid, mid, matures, cid, iid, url, title, side, price, quantity, oid, created, all_or_nothing) = row
                 account = Account(uid=uid)
                 issue = Issue(url=url, iid=iid, title=title)
                 if (not include_private) and (not issue.is_public):
                     continue
                 maturity = Maturity(matures, mid)
                 ctype = ContractType(issue, maturity, cid)
-                result.append(cls(account, ctype, side, price, quantity, oid, created))
+                result.append(cls(account, ctype, side, price, quantity, oid, created, all_or_nothing))
         return result
 
     @property
@@ -166,11 +176,18 @@ class Offer(object):
         result = []
         with self.db.conn.cursor() as curs:
             if self.side == self.db.FIXED:
-                curs.execute("""SELECT id, account, price, quantity FROM offer WHERE contract_type = %s AND side = %s and price <= %s
-                    ORDER BY price, created""",
+                curs.execute("""SELECT id, account, price, quantity, all_or_nothing
+                                FROM offer WHERE contract_type = %s AND side = %s and price <= %s
+                                ORDER BY price, created""",
                     (self.contract_type.id, self.db.UNFIXED, self.price))
                 for row in curs.fetchall():
-                    (i, a, p, q) = row
+                    (i, a, p, q, aon) = row
+                    # Don't match existing all or nothing offers with a new smaller offer
+                    if aon and q > self.quantity:
+                        continue
+                    # Don't match a new offer to an existing smaller offer
+                    if self.all_or_nothing and q < self.quantity:
+                        continue
                     if q <= self.quantity:
                         csize = q
                     else:
@@ -187,13 +204,19 @@ class Offer(object):
                     if self.quantity == 0:
                         break
                 else: # No matching items, just make the offer
-                    self.make_offer(curs, self.account.id, self.contract_type, self.side, self.price, self.quantity)
+                    self.make_offer(curs, self.account.id, self.contract_type, self.side,
+                                    self.price, self.quantity, self.all_or_nothing)
             else: # side is UNFIXED
-                curs.execute("""SELECT id, account, price, quantity FROM offer WHERE contract_type = %s AND side = %s and price >= %s
-                    ORDER BY price DESC, created""",
+                curs.execute("""SELECT id, account, price, quantity, all_or_nothing
+                                FROM offer WHERE contract_type = %s AND side = %s and price >= %s
+                                ORDER BY price DESC, created""",
                     (self.contract_type.id, self.db.FIXED, self.price))
                 for row in curs.fetchall():
-                    (i, a, p, q) = row
+                    (i, a, p, q, aon) = row
+                    if aon and q > self.quantity:   
+                        continue
+                    if self.all_or_nothing and q < self.quantity:
+                        continue
                     if q <= self.quantity:
                         csize = q
                     else:
@@ -210,7 +233,8 @@ class Offer(object):
                     if self.quantity == 0:
                         break
                 else:
-                    self.make_offer(curs, self.account.id, self.contract_type, self.side, self.price, self.quantity) 
+                    self.make_offer(curs, self.account.id, self.contract_type, self.side,
+                                    self.price, self.quantity, self.all_or_nothing) 
             result = self.db.messages.flush(curs)
             curs.connection.commit()
         return result

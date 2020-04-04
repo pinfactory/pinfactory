@@ -1117,6 +1117,48 @@ class MarketTestCase(unittest.TestCase):
         testgraph = Market().graph().as_html(100, 100)
         graph = testgraph
 
+    def test_fail_partly_match_existing_all_or_nothing_offer(self):
+        '''
+        A developer places an all or nothing offer that is not matched by a small offer placed
+        by a user.  Both offers can be cancelled.
+        '''
+
+        testdb = Market()
+        testuser = Account(balance = 25000).persist(testdb)
+        testfixer = Account(balance = 50000).persist(testdb)
+        test_contract_type = self.make_contract_type(testdb)
+
+        testoffer = testdb.offer(testfixer, test_contract_type, Market.FIXED, 500, 100, all_or_nothing = True)
+        testoffer.place()
+        self.assertEqual(0, testfixer.balance)
+        test_user_offer = testdb.offer(testuser, test_contract_type, Market.UNFIXED, 500, 25)
+        mlist = test_user_offer.place()
+        self.assertEqual(1, len(mlist))
+        self.assertEqual('offer_created', mlist[0].mclass)
+        test_user_offer.cancel()
+        testoffer.cancel()
+        self.assertEqual(25000, testuser.balance)
+        self.assertEqual(50000, testfixer.balance)
+
+    def test_new_all_or_nothing_fail_match_existing_small_offer(self):
+        '''
+        A developer places an all or nothing offer when an existing small offer exists. No match
+        occurs and the developer can cancel.
+        '''
+
+        testdb = Market()
+        testuser = Account(balance = 25000).persist(testdb)
+        testfixer = Account(balance = 50000).persist(testdb)
+        test_contract_type = self.make_contract_type(testdb)
+
+        testdb.offer(testuser, test_contract_type, Market.UNFIXED, 500, 10).place()
+        testoffer = testdb.offer(testfixer, test_contract_type, Market.FIXED, 500, 100, all_or_nothing=True)
+        mlist = testoffer.place()
+        self.assertEqual(1, len(mlist))
+        self.assertEqual('offer_created', mlist[0].mclass)
+        testoffer.cancel()
+        self.assertEqual(50000, testfixer.balance)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
