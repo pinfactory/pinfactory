@@ -1,4 +1,5 @@
-What kinds of traders might emerge?
+Examples of existing and possible trader types and
+strategies.
 
 Killer whale
 ------------
@@ -13,7 +14,7 @@ application well enough to add a major feature in a
 week might be happy to put up 20,000 tokens in order
 to receive a 20,000 token profit when the feature
 is committed and accepted. (Buy 40,000 FIXED with a
-at 0.5.)
+price of 0.5.)
 
 But they don't want to waste their time with small
 positions that might be profitable per token invested
@@ -80,7 +81,7 @@ FIXED positions than they can actually complete or
 convince others to help them with.
 
 Likely to try to get out of these positions by buying
-UNFIXED close to the maturity date.
+UNFIXED to offset them later.
 
 
 Sniper
