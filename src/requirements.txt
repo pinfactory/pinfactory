@@ -2,8 +2,8 @@ altair
 flask
 flask-bootstrap
 flask-wtf
-Authlib
-loginpass
+Authlib == 0.11
+loginpass == 0.3
 pandas
 pip >= 7.1.0
 psycopg2 >= 2.5
