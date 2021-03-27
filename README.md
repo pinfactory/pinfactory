@@ -6,8 +6,9 @@ bugs and issues.
 
 ## Setup
 
-This project has two prerequisites on the development
-system: bash and Docker.   See "Getting started".
+This project has three prerequisites on the development
+system: bash, curl, and Docker (or a Docker-compatible
+container system).   See "Getting started".
 
 
 ## Design
@@ -20,7 +21,7 @@ This project has two priorities: correctness and testability.
 
  * we use constraints and triggers at the database level
    to avoid putting the market into a hard-to-understand
-   state.
+   state even in the event of an application bug
 
  * we put a simple object-oriented layer on top of the
    database, with methods to expose what is happening
