@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: test.sh
 
 on:
   push:
@@ -14,5 +14,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build and test the Docker image
+    - name: Build and test in a Docker container
       run: ./test.sh
