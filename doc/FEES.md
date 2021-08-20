@@ -75,15 +75,6 @@ helpful things for us.
 
 All good for helping the market to grow and scale.
 
-There is a subset of contracts on which the oracle
-does not need to run, because no party has a net
-exposure to the result.  This occurs when everyone
-who is invested in that contract type owns an equal
-number of units of FIXED and UNFIXED.
-
-What about detecting no-oracle-needed contract type
-maturities, and waiving the fee?
-
 This is even more interesting when speculators
 are involved.  Speculators would be incentivized to
 get out of their positions before market maturity,
@@ -94,17 +85,6 @@ by buying out small positions, giving a small-time
 participant a guaranteed win in exchange for resolving
 the whole contract type without the oracle.
 
-So how would we still make money?
-
- * Basic futures market is generic!  Already published, and
-   we still risk that GitHub or another player could implement
-   a competing system. We have to focus on value added products
-   and those are  made more valuable
-   by feeding more info and money into the system.
-
- * Monthly or quarterly fees. (We will need
-   some fee for money in/out by way of the payment
-   processor anyway.)
-
- * Raise the percentage fee on oracle-required transactions?
-
+Oracle fees are likely to be part, but not all of the revenue mix.
+In the long run, as traders learn to use consensus to avoid the
+oracle, more and more of the fees will come from other sources.
