@@ -490,9 +490,12 @@ def permission_denied(e):
 # a change happens at their end.
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    signature = request.headers.get('X-Hub-Signature')
+    signature = request.headers.get('X-Hub-Signature', '')
     if signature:
+        app.logger.info("Received webhook signature %s" % signature)
         signature = signature.split('=')[1]
+    else:
+        app.logger.warning("Missing webhook signature")
     key = app.config.get('GITHUB_WEBHOOK_SECRET').encode()
     mac = hmac.new(key, msg=request.data, digestmod=sha1)
     if not hmac.compare_digest(mac.hexdigest(), signature):
