@@ -1,8 +1,9 @@
 altair
+Authlib == 0.11
 flask
 flask-bootstrap
 flask-wtf
-Authlib == 0.11
+jsonschema == 3.2.0
 loginpass == 0.3
 pandas
 pip >= 7.1.0
