@@ -155,23 +155,32 @@ jumps do not work in the production environment
 where the database is run under systemd.
 
 
-## clean up Docker containers and images
+## Clean up Docker containers and images
 
 This script is only for development systems where you
 aren't using Docker for other things.  **Don't run
 this script on a production system.**
+
+    ./cleanup.sh
 
 It keeps the base Debian images and images with extra
 system packages installed (because these images take
 a while to build and don't change often) and removes
 all the other images.
 
-./cleanup.sh
+
+## Modify Pinfactory code
+
+[The New and Improved Flask Mega-Tutorial, by Miguel
+Grinberg](https://courses.miguelgrinberg.com/p/flask-mega-tutorial)
+covers all the background material you will need to know. We
+encourage pull requests that are still at the "work in progress"
+stage, and will help you get them ready to merge.
 
 
 # Dependencies
 
-**Bootstrap:** Widely used web front-end component library.  A familiar style for an unusual application.
+**Bootstrap:** Widely used web front-end component library.
 
 **PostgreSQL:** Widely used RDBMS.
 
@@ -215,7 +224,8 @@ FIXME: CDNs for Bootstrap and Vega resources?
 
 [Flask, A Python Microframework](http://flask.pocoo.org/)
 
-[The Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world)
+[The Flask
+Mega-Tutorial](https://courses.miguelgrinberg.com/p/flask-mega-tutorial)
 
 [Getting started with Docker (on Fedora Linux)](https://developer.fedoraproject.org/tools/docker/docker-installation.html)
 
