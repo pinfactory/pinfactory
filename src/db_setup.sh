@@ -7,7 +7,10 @@ trap popd EXIT
 pushd $PWD
 cd $(dirname "$0")
 
-cp pg_hba.conf /etc/postgresql/9.6/main
+for pg_version in $(ls /etc/postgresql);
+do
+	cp pg_hba.conf /etc/postgresql/$pg_version/main
+done
 service postgresql restart
 
 # create the market database if it does not exist already

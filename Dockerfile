@@ -1,6 +1,6 @@
 # Setting up needed packages and dependencies.
 
-FROM jgoerzen/debian-base-security:stretch
+FROM jgoerzen/debian-base-security:buster
 ENV TERM linux
 RUN DEBIAN_FRONTEND=noninteractive apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql python3-pip libpq-dev sudo faketime

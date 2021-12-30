@@ -25,6 +25,13 @@ from message import Message, MessageList
 from offer import Offer
 from position import Position
 
+def pg_version():
+    for ent in os.listdir('/var/lib/postgresql'):
+        try:
+            float(ent)
+            return ent
+        except:
+            pass
 
 class Market(object):
     FIXED = True
@@ -79,6 +86,7 @@ class Market(object):
             raise RuntimeError
 
     def start_demo_db(self):
+        version = pg_version()
         try:
             psycopg2.connect(database=config.DB_NAME, user=config.DB_USER, host=config.DB_HOST, port=config.DB_PORT)
             return
@@ -86,16 +94,17 @@ class Market(object):
             pass
         demo_db = subprocess.Popen(["/usr/bin/sudo", "-u", "postgres", "/usr/bin/faketime", "-f",
                                     "+%ds" % self.time_offset,
-                                    "/usr/lib/postgresql/9.6/bin/postgres",
-                                    "-D", "/var/lib/postgresql/9.6/main",
-                                    "-c", "config_file=/etc/postgresql/9.6/main/postgresql.conf"],
+                                    "/usr/lib/postgresql/%s/bin/postgres" % version,
+                                    "-D", "/var/lib/postgresql/%s/main" % version,
+                                    "-c", "config_file=/etc/postgresql/%s/main/postgresql.conf" % version],
                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        logging.info("Started test database. PID is %d, time offset %d seconds" % (demo_db.pid, self.time_offset))
+        logging.info("Started test database version %s. PID is %d, time offset %d seconds" % (version, demo_db.pid, self.time_offset))
 
     def stop_demo_db(self):
         self.conn.close()
+        version = pg_version()
         try:
-            with open("/var/lib/postgresql/9.6/main/postmaster.pid") as pidfile:
+            with open("/var/lib/postgresql/%s/main/postmaster.pid" % version) as pidfile:
                 pidline = pidfile.readline()
             os.kill(int(pidline), signal.SIGKILL)
             logging.info("Waiting for test database to shut down.")
