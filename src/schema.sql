@@ -2,9 +2,9 @@
 --the database. Triggers are the exception -- they run whenever a change happens.
 --It is run when db_setup.sh is called (from restart.sh).
 
---Database trigger: Keeps column called modified set to time and date at the
+--Database trigger: Keeps column called "modified" set to the time and date at the
 --current time of calling this function.
---NEW is a database record holding the info we are updating.
+--NEW is a database table row holding the info we are updating.
 CREATE OR REPLACE FUNCTION update_modified_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -63,9 +63,18 @@ CREATE TABLE IF NOT EXISTS userid (
 	UNIQUE (host, profile)
 );
 
+-- Projects (Holds summary info and account responsible)
+CREATE TABLE IF NOT EXISTS project (
+	id SERIAL PRIMARY KEY,
+	url TEXT UNIQUE NOT NULL,
+	owner INT REFERENCES account(id) DEFAULT 1,
+	webhook_secret TEXT
+);
+
 -- issues (on which trades can be made)
 CREATE TABLE IF NOT EXISTS issue (
 	id SERIAL PRIMARY KEY,
+	project INT REFERENCES project(id) DEFAULT 1,
 	url TEXT UNIQUE NOT NULL,
 	title TEXT, /* NULL if no title sent by the webhook */
 	created TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -205,6 +214,10 @@ CREATE VIEW ticker AS
 -- create the system account if it does not exist
 INSERT INTO account (system, balance) SELECT true, 0
 	WHERE NOT EXISTS ( SELECT id FROM account WHERE system = true);
+
+-- create the default project  if it does not exist
+INSERT INTO project (url) VALUES ('https://github.com/pinfactory/pinfactory')
+	ON CONFLICT (url) DO NOTHING; 
 
 -- all done
 INSERT INTO message (class, recipient, message)
