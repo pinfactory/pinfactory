@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import subprocess
+import time
 
 # Import certain classes.
 from authlib.flask.client import OAuth
@@ -546,20 +547,25 @@ github_bp = create_flask_blueprint(GitHub, oauth, handle_authorize)
 app.register_blueprint(github_bp, url_prefix='/github')
 app.logger.setLevel(logging.DEBUG)
 start_demo_db = False
+
+temporary_process = False
 if 'development' == app.config.get('ENV'):
-    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
+    if not os.environ.get('WERKZEUG_RUN_MAIN'):
         # This is the process that will be killed and restarted.
-        # Can't do anything here, so just wait for the end.
-        time.sleep(3600)
+        temporary_process = True
     start_demo_db = True
 app.logger.info("App %s started. Env is %s" % (__name__, app.config.get('ENV')))
 app.logger.debug("Logging at DEBUG level.")
 
 # Market class gets created here. 
-market = Market(applog=app.logger, start_demo_db=start_demo_db)
-app.logger.debug("Market connected.")
+if temporary_process:
+    market = None
+else:
+    market = Market(applog=app.logger, start_demo_db=start_demo_db)
+    app.logger.debug("Market connected.")
+    market.setup()
 
-if 'development' == app.config.get('ENV'):
+if 'development' == app.config.get('ENV') and not temporary_process:
     app.logger.info('''
 
 #################################################################################
@@ -574,6 +580,5 @@ if 'development' == app.config.get('ENV'):
 #                                                                               #
 #################################################################################
 ''')
-market.setup()
 
 # vim: autoindent textwidth=100 tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python

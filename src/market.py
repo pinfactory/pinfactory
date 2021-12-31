@@ -49,7 +49,9 @@ class Market(object):
         global logging
         if applog is not None:
             logging = applog
-        self.logging = logging
+            self.logging = applog
+        else:
+            self.logging = logging
         self.system_id = None
         self.messages = MessageList(self)
         self.contract_type = ContractType
