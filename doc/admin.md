@@ -4,11 +4,11 @@ Administration guide
 Supported platform
 ------------------
 
- * Debian version 9
+ * Debian version 11
 
-This is the supported platform for a real deploy.
-(Any platform with bash and Docker should work for
-development and testing.)
+This is the supported platform for a real deploy.  (Any platform
+with bash, curl and Docker should work for development and testing,
+because our tests scripts run in a Debian 11 container.)
 
 
 Deploy the current version to the server
@@ -75,19 +75,24 @@ Get the certificate.
 
 `sudo certbot --apache`
 
-TODO: Add the certbot renew to the weekly cron.
-
 
 GitHub webhook
 --------------
 
-The market has a webhook at the path `/webhook`.
-This is where GitHub POSTs to in order to inform us
-about new issues, and changes to issues.
+The market has a webhook at the path `/webhook`.  This is where
+GitHub POSTs, to inform us about new issues, and changes to issues.
 
-To configure it on the GitHub side, go to
+To configure it on the GitHub side, go to "Settings" and select "Webhooks."
 
-"Webhooks" under "Project settings" and select "Issues".
+Payload URL should be `https://market.pinfactory.org/webhook`
+
+Content type should be `application/json`
+
+Fill in the secret for your project.
+
+Under **Which events would you like to trigger this webhook?** select "Issues."
+
+Make sure "Active" is checked.
 
 
 Log in with GitHub
