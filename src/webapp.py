@@ -500,7 +500,7 @@ def webhook():
     key = app.config.get('GITHUB_WEBHOOK_SECRET').encode()
     mac = hmac.new(key, msg=request.data, digestmod=sha1)
     if not hmac.compare_digest(mac.hexdigest(), signature):
-        app.logger.warning("Bad or missing signature in webhook does not match %s" % mac)
+        app.logger.warning("Bad or missing signature in webhook does not match %s" % mac.hexdigest())
         app.logger.warning("signature: %s" % signature)
         app.logger.warning("hmac digest: %s" % mac.hexdigest())
         # FIXME
@@ -512,8 +512,9 @@ def webhook():
         payload = request.get_json()
         action = payload.get('action')
     except AttributeError:
-        payload = json.loads(request.form.get('payload'))
-        action = payload.get('action')
+        app.logger.warning("Failed to get JSON from webhook request")
+        # FIXME: raise an error here
+        return 'OK'
 
     app.logger.debug("Webhook action is %s" % action)
     if not action in ('opened', 'edited', 'deleted', 'closed', 'reopened'):
