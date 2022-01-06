@@ -8,7 +8,7 @@ class OfferForm(FlaskForm):
     side = SelectField('side', choices = [('', 'Select one'), ('FIXED', 'FIXED'), ('UNFIXED', 'UNFIXED')],
                        validators=[AnyOf(['FIXED', 'UNFIXED'])])
     submit = SubmitField('Place offer')
-    issue = HiddenField('issue', validators=[NumberRange()])
+    issue = HiddenField('issue')
     issuename = StringField('issuename', render_kw={'readonly': True})
     maturitydate = StringField('maturitydate', render_kw={'readonly': True})
     maturity = HiddenField('maturity')
