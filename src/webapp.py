@@ -388,6 +388,27 @@ def history():
     messages = market.history.filter(ticker=True)
     return render_template('history.html', user = user, messages=messages)
 
+@app.route('/feed', methods=['GET'])
+def feed():
+    messages = []
+    (prev_contract, prev_price) = (None, 0)
+    history = market.history.filter()
+    for mess in history:
+        if not mess.contract_type:
+            continue
+        # Don't repeat the same contract/price
+        if mess.contract_type == prev_contract and mess.price == prev_price:
+            continue
+        (prev_contract, prev_price) = (mess.contract_type, mess.price)
+        if mess.mclass == 'offer_created' or mess.mclass == 'contract_created' or (
+            mess.mclass == 'contract_resolved' and mess.price):
+            messages.append(mess)
+        if len(messages) >= 15:
+            break
+    res = make_response(render_template('feed.xml', messages=messages))
+    res.headers["Content-type"] = "application/xml; charset=utf-8"
+    return res
+
 @app.route('/ticker', methods=['GET'])
 def ticker():
     user = get_user()
