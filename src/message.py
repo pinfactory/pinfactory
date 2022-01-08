@@ -133,6 +133,21 @@ class Message(object):
         if self.text:
             return self.text
 
+    @property
+    def summary(self):
+        "Summary for notifications and RSS feeds"
+        value = ''
+        if int(self.price) and int(self.quantity):
+            value = ": %d tokens" % ((self.price * self.quantity)/1000)
+        if self.mclass == 'offer_created' and self.side:
+            return "New developer offer on %s matures %s%s" % (self.contract_type.project, self.contract_type.maturity.display, value)
+        if self.mclass == 'offer_created':
+            return "New funder offer on %s matures %s%s" % (self.contract_type.project, self.contract_type.maturity.display, value)
+        if self.mclass == 'contract_created':
+            return "New price on a %s issue: %.3f" % (self.contract_type.project, (self.price/1000))
+        else:
+            return self.__repr__()
+
     def __repr__(self):
         try:
             return self.make_text()

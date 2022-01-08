@@ -104,6 +104,10 @@ class ContractType(object):
         self.resolve_form = None
 
     def __eq__(self, other):
+        if self and not other:
+            return False
+        if other and not self:
+            return False
         if self.id and other.id and self.id != other.id:
             return False
         if self.maturity != other.maturity:
@@ -114,6 +118,13 @@ class ContractType(object):
 
     def __repr__(self):
         return "%s (%d) with %s" % (self.issue, self.issue.issuenumber, self.maturity)
+
+    @property
+    def project(self):
+        try:
+            return ('/').join(self.issue.url.split('/')[3:5])
+        except Exception as e:
+            return "an open source project"
 
     def persist(self):
         with self.db.conn.cursor() as curs:
