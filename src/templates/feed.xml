@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+	<channel>
+		<title>Pinfactory</title>
+		<link>https://market.pinfactory.org/</link>
+		<description>A market for software issues.</description>
+		<language>en-us</language>
+
+	{% for message in messages %}
+		<item>
+			<title>{{ message.summary }}</title>
+			<description><![CDATA[
+				<p>Issue: <a href="/issue/{{ message.contract_type.issue.id }}">{{ message.contract_type.issue.displayname }}</a>
+				<br>Price: {{message.price}}
+				<br>Quantity: {{message.quantity}}
+				<br>Event type: {{message.mclass}}</p>
+			]]></description>
+			<pubDate>{{ message.datetime }}</pubDate>
+		</item>
+	{% endfor %}
+
+	</channel>
+</rss>
+
