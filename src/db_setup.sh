@@ -18,4 +18,4 @@ echo "SELECT 'CREATE DATABASE market' WHERE NOT EXISTS (SELECT FROM pg_database 
 
 [ -e db_dump.sql ] && psql --user postgres market < db_dump.sql
 psql --user postgres -d market -f schema.sql
-
+service postgresql stop

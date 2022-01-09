@@ -47,4 +47,4 @@ docker run \
 	-e LC_ALL=C.UTF-8 \
 	-e LANG=C.UTF-8 \
 	--volume "$(pwd)"/src:/srv/market:ro,Z \
-	--entrypoint="/usr/local/bin/flask" market_web run --host=0.0.0.0
+	--entrypoint="/srv/market/inside_test.sh" market_web /usr/local/bin/flask run --host=0.0.0.0

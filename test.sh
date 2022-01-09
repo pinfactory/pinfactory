@@ -18,5 +18,5 @@ set -x
 
 docker build --tag=market_test .
 docker run --volume "$(pwd)"/src:/srv/market:ro,Z \
-	--entrypoint "/usr/bin/env" market_test python3 /srv/market/test.py
+	--entrypoint "/srv/market/inside_test.sh" market_test /usr/bin/env python3 /srv/market/test.py
 
