@@ -88,6 +88,7 @@ class Market(object):
             raise RuntimeError
 
     def start_demo_db(self):
+        return
         version = pg_version()
         try:
             psycopg2.connect(database=config.DB_NAME, user=config.DB_USER, host=config.DB_HOST, port=config.DB_PORT)
