@@ -77,15 +77,12 @@ zero positions.
 
 ### On Linux
 
-Install Docker from the package manager and start it
-with the service manager.  For Fedora:
+Install Docker (or a compatible container tool that provides the
+`docker` command) from the package
+manager and start it with the service manager.  Check your
+distribution's instructions.
 
-```
-sudo dnf install docker
-sudo systemctl start docker
-```
-
-Test that you can connect to the Docker daemon with:
+Test that you can connect with:
 
 ```
 docker ps
@@ -129,30 +126,6 @@ Visit the site at: http://localhost:5000/
 Your changes in the `src` directory will show up in
 the container, and Flask is configured to auto-reload
 when you modify anything.
-
-
-## Do the web demo with two users (demo environment only)
-
-This requires Firefox.
-
-	./webdemo.sh
-
-This script will start two copies of Firefox, running
-as two separate local users, on a local copy of the
-application running in a container.
-
-
-## Jump forward in time (demo environment only)
-
-To jump time forward, run the `timejump.sh` script
-with one command-line argument, the number of days
-to jump.  For example, to jump 2 weeks:
-
-    ./timejump 14
-
-This will stop and start the demo database.  Time
-jumps do not work in the production environment
-where the database is run under systemd.
 
 
 ## Clean up Docker containers and images
