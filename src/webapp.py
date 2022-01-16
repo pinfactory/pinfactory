@@ -568,22 +568,20 @@ def webhook():
 github_bp = create_flask_blueprint(GitHub, oauth, handle_authorize)
 app.register_blueprint(github_bp, url_prefix='/github')
 app.logger.setLevel(logging.DEBUG)
-start_demo_db = False
 
 temporary_process = False
 if 'development' == app.config.get('ENV'):
     if not os.environ.get('WERKZEUG_RUN_MAIN'):
         # This is the process that will be killed and restarted.
         temporary_process = True
-    start_demo_db = True
 app.logger.info("App %s started. Env is %s" % (__name__, app.config.get('ENV')))
 app.logger.debug("Logging at DEBUG level.")
 
-# Market class gets created here. 
+# Market object gets created here, unless this is a temporary process.
 if temporary_process:
     market = None
 else:
-    market = Market(applog=app.logger, start_demo_db=start_demo_db)
+    market = Market(applog=app.logger)
     app.logger.debug("Market connected.")
     market.setup()
 

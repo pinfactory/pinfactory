@@ -1,7 +1,3 @@
-# Main entry function into the marketplace once setup is complete.
-
-#!/usr/bin/env python3
-
 from datetime import timezone
 import logging
 import os
@@ -45,7 +41,7 @@ class Market(object):
     # to ensure 1-1 correspondence (each market has only 1 database). The connect
     # function below gives you a database connection object. This is the object
     # you need to perform sql queries into the database (retrieve or input data).
-    def __init__(self, applog=None, start_demo_db=False):
+    def __init__(self, applog=None):
         global logging
         if applog is not None:
             logging = applog
@@ -64,10 +60,6 @@ class Market(object):
         self.history.db = self
         self.graph = Graph
         self.graph.db = self
-        self.demo_db_pid = None
-        self.time_offset = 0
-        if start_demo_db:
-            self.start_demo_db()
         self.connect()
         with self.conn.cursor() as curs:
             curs.execute("SELECT id FROM account WHERE system = true")
@@ -86,48 +78,6 @@ class Market(object):
         else:
             logging.error("Database connection failed")
             raise RuntimeError
-
-    def start_demo_db(self):
-        return
-        version = pg_version()
-        try:
-            psycopg2.connect(database=config.DB_NAME, user=config.DB_USER, host=config.DB_HOST, port=config.DB_PORT)
-            return
-        except psycopg2.OperationalError:
-            pass
-        demo_db = subprocess.Popen(["/usr/bin/sudo", "-u", "postgres", "/usr/bin/faketime", "-f",
-                                    "+%ds" % self.time_offset,
-                                    "/usr/lib/postgresql/%s/bin/postgres" % version,
-                                    "-D", "/var/lib/postgresql/%s/main" % version,
-                                    "-c", "config_file=/etc/postgresql/%s/main/postgresql.conf" % version],
-                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        logging.info("Started test database version %s. PID is %d, time offset %d seconds" % (version, demo_db.pid, self.time_offset))
-
-    def stop_demo_db(self):
-        self.conn.close()
-        version = pg_version()
-        try:
-            with open("/var/lib/postgresql/%s/main/postmaster.pid" % version) as pidfile:
-                pidline = pidfile.readline()
-            os.kill(int(pidline), signal.SIGKILL)
-            logging.info("Waiting for test database to shut down.")
-            time.sleep(1)
-        except ProcessLookupError:
-            pass
-
-        while True:
-            try:
-                psycopg2.connect(database=config.DB_NAME, user=config.DB_USER, host=config.DB_HOST, port=config.DB_PORT)
-            except:
-                return
-
-    def time_jump(self, seconds):
-        if seconds < 0:
-            raise NotImplementedError
-        self.stop_demo_db()
-        self.time_offset += seconds
-        self.start_demo_db()
-        self.connect()
 
     def now(self):
         with self.conn.cursor() as curs:
