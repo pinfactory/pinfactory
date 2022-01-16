@@ -40,18 +40,6 @@ class MarketTestCase(unittest.TestCase):
         from datetime import datetime
         self.assertAlmostEqual(testdb.now().timestamp(), datetime.now().timestamp(), delta = 0.2)
 
-    def test_time_jump(self):
-        '''
-        Sanity test: is the time on the database close to the time in the application?
-        '''
-        return None
-        ff_seconds = 7 * 24 * 60 * 60
-        testdb = Market(start_demo_db=True)
-        from datetime import datetime
-        self.assertAlmostEqual(testdb.now().timestamp(), datetime.now().timestamp(), delta = 0.2)
-        testdb.time_jump(ff_seconds)
-        self.assertAlmostEqual(testdb.now().timestamp(), datetime.now().timestamp() + ff_seconds, delta = 0.2)
-
     def test_q_and_refund(self):
         '''
         Arguments: old quantity, new contract (UNFIXED is negative)
@@ -1162,8 +1150,7 @@ class MarketTestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    demo_db = Market(start_demo_db=True)
-    unittest.main(failfast=True)
-    demo_db.stop_demo_db()
+    demo_db = Market()
+    unittest.main()
 
 # vim: autoindent textwidth=100 tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
