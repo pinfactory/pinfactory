@@ -37,5 +37,6 @@ a2enconf wsgi
 systemctl stop apache2
 ./db_setup.sh
 
-# Finally restart the web server
+# Finally restart the database and web servers
+systemctl start postgresql
 systemctl start apache2
