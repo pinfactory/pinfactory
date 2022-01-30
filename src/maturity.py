@@ -5,7 +5,7 @@ import logging
 
 import psycopg2
 
-#Maturity has an id to help to join it to other tables. See schema.sql.
+# Maturity has an id to help to join it to other tables. See schema.sql.
 class Maturity(object):
     def __init__(self, maturity, mid=None):
         self.db = None
@@ -13,11 +13,11 @@ class Maturity(object):
             self.id = int(mid)
         except TypeError:
             self.id = None
-        maturity = maturity.replace(tzinfo = timezone.utc)
+        maturity = maturity.replace(tzinfo=timezone.utc)
         self.maturity = maturity
 
-#When resolving we need to compare maturities to see all contracts that
-#have the same maturation, and so forth.
+    # When resolving we need to compare maturities to see all contracts that
+    # have the same maturation, and so forth.
     def __eq__(self, other):
         # self.maturity = self.maturity.replace(tzinfo=timezone.utc)
         # other.maturity = other.maturity.replace(tzinfo=timezone.utc)
@@ -28,8 +28,8 @@ class Maturity(object):
     def __repr__(self):
         return "maturity %d at %s" % (self.id, self.display)
 
-#User never sees the maturity id (for internal db operations). They just see the
-#time and associated contract.
+    # User never sees the maturity id (for internal db operations). They just see the
+    # time and associated contract.
     @property
     def display(self):
         return self.maturity.strftime("%d %b")
@@ -38,7 +38,7 @@ class Maturity(object):
     def tzinfo(self):
         return self.maturity.tzinfo
 
-#Find expiration dates after the current date/time.
+    # Find expiration dates after the current date/time.
     @classmethod
     def next_expiration_after(cls, when):
         "Next available expiration datetime, after the datetime given"
@@ -47,10 +47,10 @@ class Maturity(object):
         while True:
             when = when + timedelta(days=1)
             (weeknum, weekday) = when.isocalendar()[1:]
-            if (weeknum % 2 == 0 and weekday == 6):
+            if weeknum % 2 == 0 and weekday == 6:
                 return when
 
-#Ensure there are 3 possible maturity times to choose from.
+    # Ensure there are 3 possible maturity times to choose from.
     @classmethod
     def make_upcoming(cls, db):
         result = []
@@ -62,14 +62,15 @@ class Maturity(object):
 
     def persist(self, db):
         with db.conn.cursor() as curs:
-            curs.execute("SELECT id FROM maturity WHERE matures = %s",
-                (self.maturity,))
+            curs.execute("SELECT id FROM maturity WHERE matures = %s", (self.maturity,))
             if curs.rowcount == 1:
                 self.id = curs.fetchone()[0]
                 return self
-            curs.execute('''INSERT INTO maturity (matures) VALUES (%s)
-                            RETURNING id, matures''',
-                (self.maturity,))
+            curs.execute(
+                """INSERT INTO maturity (matures) VALUES (%s)
+                            RETURNING id, matures""",
+                (self.maturity,),
+            )
             (self.id, self.matures) = curs.fetchone()
             curs.connection.commit()
             return self
@@ -78,7 +79,9 @@ class Maturity(object):
     def available(cls, db):
         result = []
         with db.conn.cursor() as curs:
-            curs.execute("SELECT matures, id FROM maturity WHERE matures > NOW() ORDER BY matures")
+            curs.execute(
+                "SELECT matures, id FROM maturity WHERE matures > NOW() ORDER BY matures"
+            )
             for row in curs.fetchall():
                 result.append(cls(*row))
         return result

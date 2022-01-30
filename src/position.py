@@ -8,6 +8,7 @@ from contract import ContractType
 from issue import Issue
 from maturity import Maturity
 
+
 class Position(object):
     db = None
 
@@ -29,7 +30,7 @@ class Position(object):
         side = "FIXED"
         if self.quantity < 0:
             side = "UNFIXED"
-        return("%d %s contract on %s" % (abs(self.quantity), side, self.contract_type))
+        return "%d %s contract on %s" % (abs(self.quantity), side, self.contract_type)
 
     @property
     def side(self):
@@ -41,19 +42,19 @@ class Position(object):
 
     @property
     def displayprice(self):
-        return "%.3f" % ((self.basis/abs(self.quantity)) / 1000)
+        return "%.3f" % ((self.basis / abs(self.quantity)) / 1000)
 
     @property
     def display_unfixed_price(self):
-        return "%.3f" % (1 - (self.basis/abs(self.quantity)) / 1000)
+        return "%.3f" % (1 - (self.basis / abs(self.quantity)) / 1000)
 
     @property
     def display_total_price(self):
-        return "%d" % int(self.basis/1000)
+        return "%d" % int(self.basis / 1000)
 
     @property
     def display_total_unfixed_price(self):
-        return "%d" % int(abs(self.quantity) - self.basis/1000)
+        return "%d" % int(abs(self.quantity) - self.basis / 1000)
 
     @property
     def displayside(self):
@@ -80,7 +81,7 @@ class Position(object):
             all_pids = True
         if account:
             uid = account.id
-        else: 
+        else:
             uid = None
             all_accounts = True
         if issue:
@@ -90,7 +91,8 @@ class Position(object):
             all_issues = True
         result = []
         with cls.db.conn.cursor() as curs:
-            curs.execute('''SELECT maturity.id, maturity.matures, contract_type.id,
+            curs.execute(
+                """SELECT maturity.id, maturity.matures, contract_type.id,
                             contract_type.issue, issue.url, issue.title,
                             position.account, position.quantity, position.basis,
                             position.created, position.modified, position.id
@@ -100,20 +102,37 @@ class Position(object):
                             WHERE (position.id = %s OR %s)
                             AND (account = %s OR %s)
                             AND (issue = %s OR %s)
-                            ''', (pid, all_pids, uid, all_accounts, iid, all_issues))
+                            """,
+                (pid, all_pids, uid, all_accounts, iid, all_issues),
+            )
             for row in curs.fetchall():
-                (mid, matures, cid, iid, url, title, uid, quantity, basis, created, modified, pid) = row
+                (
+                    mid,
+                    matures,
+                    cid,
+                    iid,
+                    url,
+                    title,
+                    uid,
+                    quantity,
+                    basis,
+                    created,
+                    modified,
+                    pid,
+                ) = row
                 account = Account(uid=uid)
                 issue = Issue(url=url, iid=iid, title=title)
                 maturity = Maturity(matures, mid)
                 ctype = ContractType(issue, maturity, cid)
-                result.append(cls(pid, account, ctype, quantity, basis, created, modified))
+                result.append(
+                    cls(pid, account, ctype, quantity, basis, created, modified)
+                )
         return result
 
     def offset(self, total_price):
-        '''
+        """
         Returns a new offer that if accepted would cancel out this position.
-        '''
+        """
         account = self.account
         contract_type = self.contract_type
         side = not self.side

@@ -9,7 +9,9 @@ import time
 try:
     import psycopg2
 except:
-    print("This needs to be run on the server or container with Python dependencies installed.")
+    print(
+        "This needs to be run on the server or container with Python dependencies installed."
+    )
     sys.exit(0)
 
 import config
@@ -21,13 +23,15 @@ from message import Message, MessageList
 from offer import Offer
 from position import Position
 
+
 def pg_version():
-    for ent in os.listdir('/var/lib/postgresql'):
+    for ent in os.listdir("/var/lib/postgresql"):
         try:
             float(ent)
             return ent
         except:
             pass
+
 
 class Market(object):
     FIXED = True
@@ -68,13 +72,18 @@ class Market(object):
     def connect(self):
         for i in range(5):
             try:
-                self.conn = psycopg2.connect(database=config.DB_NAME, user=config.DB_USER, host=config.DB_HOST, port=config.DB_PORT)
+                self.conn = psycopg2.connect(
+                    database=config.DB_NAME,
+                    user=config.DB_USER,
+                    host=config.DB_HOST,
+                    port=config.DB_PORT,
+                )
                 if i > 0:
                     logging.info("Connected to database after %d attempt(s)." % i)
                 break
             except psycopg2.OperationalError:
                 logging.info("Waiting for database.")
-                time.sleep(2**(i+3))
+                time.sleep(2 ** (i + 3))
         else:
             logging.error("Database connection failed")
             raise RuntimeError
@@ -88,7 +97,9 @@ class Market(object):
 
     def fund_test_users(self):
         with self.conn.cursor() as curs:
-            curs.execute("UPDATE account set balance = balance + 10000000 WHERE balance < 10000000")
+            curs.execute(
+                "UPDATE account set balance = balance + 10000000 WHERE balance < 10000000"
+            )
             curs.connection.commit()
 
     def lookup_user(self, host, sub, username=None, profile=None):
@@ -134,5 +145,6 @@ class Market(object):
 
     def ticker_csv(self):
         return dump_csv(self).getvalue()
+
 
 # vim: autoindent textwidth=100 tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python

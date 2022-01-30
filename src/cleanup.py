@@ -4,4 +4,3 @@ from market import Market
 
 market = Market()
 market.cleanup()
-

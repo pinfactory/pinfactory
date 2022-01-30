@@ -1,5 +1,6 @@
 altair
 Authlib == 0.11
+black
 flask
 flask-bootstrap
 flask-wtf

@@ -8,11 +8,22 @@ from issue import Issue
 from contract import ContractType
 from maturity import Maturity
 
+
 class Message(object):
-    def __init__(self, mclass, account=None, contract_type=None,
-                 side=None, price=None, quantity=None,
-                 offer=None, contract=None, text=None, created=None,
-                 mid=None):
+    def __init__(
+        self,
+        mclass,
+        account=None,
+        contract_type=None,
+        side=None,
+        price=None,
+        quantity=None,
+        offer=None,
+        contract=None,
+        text=None,
+        created=None,
+        mid=None,
+    ):
         self.id = mid
         self.account = account
         self.contract_type = contract_type
@@ -28,7 +39,7 @@ class Message(object):
     @property
     # converting price to tokens from millitokens (for display)
     def displayprice(self):
-        return "%.3f" % (self.price/1000)
+        return "%.3f" % (self.price / 1000)
 
     @classmethod
     def filter(cls, account=None, issue=None, ticker=False):
@@ -51,7 +62,8 @@ class Message(object):
         # SQL statement that you pass to the database. The result of this
         # execution can then be "fetched".
         with cls.db.conn.cursor() as curs:
-            curs.execute('''SELECT issue, url, title, maturity, matures,
+            curs.execute(
+                """SELECT issue, url, title, maturity, matures,
                             id, class, created,
                             contract_type, side, price, quantity, message
                             FROM message_overview
@@ -60,10 +72,25 @@ class Message(object):
                             AND (%s OR (side = true AND
                                 (class = 'contract_created' OR class = 'contract_resolved')
                                 AND quantity > 0))
-                            ORDER BY created DESC''',
-                            (all_issues, iid, all_accounts, uid, all_events))
+                            ORDER BY created DESC""",
+                (all_issues, iid, all_accounts, uid, all_events),
+            )
             for row in curs.fetchall():
-                (iid, url, title, maturity_id, matures, mid, mclass, created, cid, side, price, quantity, text) = row
+                (
+                    iid,
+                    url,
+                    title,
+                    maturity_id,
+                    matures,
+                    mid,
+                    mclass,
+                    created,
+                    cid,
+                    side,
+                    price,
+                    quantity,
+                    text,
+                ) = row
                 if ticker and (not url or not title or not matures or not maturity_id):
                     pass
                     # continue #FIXME
@@ -74,9 +101,19 @@ class Message(object):
                     maturity = Maturity(matures, maturity_id)
                 if issue and maturity:
                     contract_type = ContractType(issue, maturity, cid=cid)
-                result.append(cls(mclass, account=account, contract_type=contract_type,
-                              side=side, price=price, quantity=quantity, text=text,
-                              created=created, mid=mid))
+                result.append(
+                    cls(
+                        mclass,
+                        account=account,
+                        contract_type=contract_type,
+                        side=side,
+                        price=price,
+                        quantity=quantity,
+                        text=text,
+                        created=created,
+                        mid=mid,
+                    )
+                )
             return result
 
     # send takes a cursor because Messages are only sent as the result of
@@ -89,11 +126,21 @@ class Message(object):
         ctype = None
         if self.contract_type:
             ctype = self.contract_type.id
-        curs.execute('''INSERT INTO message (class, recipient,
+        curs.execute(
+            """INSERT INTO message (class, recipient,
                                            contract_type, side, price, quantity, message)
                                            VALUES (%s, %s, %s, %s, %s, %s, %s)
-                                           RETURNING id''', (self.mclass, self.account, ctype,
-                                                             self.side, self.price, self.quantity, str(self)))
+                                           RETURNING id""",
+            (
+                self.mclass,
+                self.account,
+                ctype,
+                self.side,
+                self.price,
+                self.quantity,
+                str(self),
+            ),
+        )
         self.id = curs.fetchone()[0]
         if log:
             logging.info(self)
@@ -105,46 +152,72 @@ class Message(object):
         return self.created.strftime("%d %b %H:%M")
 
     def make_text(self):
-        whichside = 'UNFIXED'
+        whichside = "UNFIXED"
         if self.side == True:
-            whichside = 'FIXED'
-        if self.mclass == 'offer_created':
+            whichside = "FIXED"
+        if self.mclass == "offer_created":
             return "Offer made: %d units of %s on %s at a (fixed) price of %.3f" % (
-                self.quantity, whichside, self.contract_type, self.price/1000)
-        if self.mclass == 'offer_cancelled':
-            return "Offer cancelled: %d units of %s on %s at a (fixed) price of %.3f" % (
-                self.quantity, whichside, self.contract_type, self.price/1000)
-        if self.mclass == 'contract_created':
+                self.quantity,
+                whichside,
+                self.contract_type,
+                self.price / 1000,
+            )
+        if self.mclass == "offer_cancelled":
+            return (
+                "Offer cancelled: %d units of %s on %s at a (fixed) price of %.3f"
+                % (self.quantity, whichside, self.contract_type, self.price / 1000)
+            )
+        if self.mclass == "contract_created":
             return "Contract formed: %d units of %s %s at a (fixed) price of %.3f" % (
-                self.quantity, whichside, self.contract_type, self.price/1000)
-        if self.mclass == 'position_covered':
+                self.quantity,
+                whichside,
+                self.contract_type,
+                self.price / 1000,
+            )
+        if self.mclass == "position_covered":
             return "Contract on %s had %d units covered and tokens returned" % (
-                self.contract_type, self.quantity)
-        if self.mclass == 'contract_resolved':
+                self.contract_type,
+                self.quantity,
+            )
+        if self.mclass == "contract_resolved":
             # TODO: Remove this workaround when we no longer have old
             # resolutions with 1000x quantities and no price
             if self.price is None:
                 if self.quantity:
                     self.price = 1000
-                    self.quantity = self.quantity/1000
+                    self.quantity = self.quantity / 1000
                 else:
                     self.price = 0
-            return "Contract resolved: %s for a payout of %d tokens" % (self.contract_type, (self.price * self.quantity)/1000)
+            return "Contract resolved: %s for a payout of %d tokens" % (
+                self.contract_type,
+                (self.price * self.quantity) / 1000,
+            )
         if self.text:
             return self.text
 
     @property
     def summary(self):
         "Summary for notifications and RSS feeds"
-        value = ''
+        value = ""
         if int(self.price) and int(self.quantity):
-            value = ": %d tokens" % ((self.price * self.quantity)/1000)
-        if self.mclass == 'offer_created' and self.side:
-            return "New developer offer on %s matures %s%s" % (self.contract_type.project, self.contract_type.maturity.display, value)
-        if self.mclass == 'offer_created':
-            return "New funder offer on %s matures %s%s" % (self.contract_type.project, self.contract_type.maturity.display, value)
-        if self.mclass == 'contract_created':
-            return "New price on a %s issue: %.3f" % (self.contract_type.project, (self.price/1000))
+            value = ": %d tokens" % ((self.price * self.quantity) / 1000)
+        if self.mclass == "offer_created" and self.side:
+            return "New developer offer on %s matures %s%s" % (
+                self.contract_type.project,
+                self.contract_type.maturity.display,
+                value,
+            )
+        if self.mclass == "offer_created":
+            return "New funder offer on %s matures %s%s" % (
+                self.contract_type.project,
+                self.contract_type.maturity.display,
+                value,
+            )
+        if self.mclass == "contract_created":
+            return "New price on a %s issue: %.3f" % (
+                self.contract_type.project,
+                (self.price / 1000),
+            )
         else:
             return self.__repr__()
 
@@ -160,6 +233,7 @@ class Message(object):
     def __str__(self):
         return self.__repr__()
 
+
 # Convenient class to handle a list of messages. For example, when a contract is
 # being created, a number of messages need to be sent. Message list allows us
 # to build up a list of messages and send them.
@@ -168,10 +242,33 @@ class MessageList(collections.UserList):
         self.market = market
         self.data = []
 
-    def add(self, mclass, account=None, contract_type=None, side=None, price=None, quantity=None, offer=None, contract=None, text=None):
+    def add(
+        self,
+        mclass,
+        account=None,
+        contract_type=None,
+        side=None,
+        price=None,
+        quantity=None,
+        offer=None,
+        contract=None,
+        text=None,
+    ):
         if account is None:
             account = self.market.system_id
-        self.append(Message(mclass, account, contract_type, side, price, quantity, offer, contract, text))
+        self.append(
+            Message(
+                mclass,
+                account,
+                contract_type,
+                side,
+                price,
+                quantity,
+                offer,
+                contract,
+                text,
+            )
+        )
 
     def filter(self, account=None):
         result = MessageList()
@@ -194,4 +291,4 @@ class MessageList(collections.UserList):
         return result
 
     def __repr__(self):
-        return ', '.join(repr(m) for m in self)
+        return ", ".join(repr(m) for m in self)
