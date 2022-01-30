@@ -32,7 +32,13 @@ class Issue(object):
         self.offer_volume = offer_volume
 
     def __eq__(self, other):
-        return self.id == other.id and self.url == other.url
+        "Compare content of two issues"
+        return (
+            self.id == other.id
+            and self.url == other.url
+            and self.title == other.title
+            and self.is_open == other.is_open
+        )
 
     def __repr__(self):
         return self.displayname

@@ -130,9 +130,7 @@ class Position(object):
         return result
 
     def offset(self, total_price):
-        """
-        Returns a new offer that if accepted would cancel out this position.
-        """
+        "Returns a new offer that if accepted would cancel out this position."
         account = self.account
         contract_type = self.contract_type
         side = not self.side

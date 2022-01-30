@@ -141,6 +141,7 @@ class Offer(object):
             raise NotImplementedError
 
     def __eq__(self, other):
+        "Compare two offers and log differences."
         if self.id is not None and other.id is not None and self.id != other.id:
             return False
         if self.account != other.account:
