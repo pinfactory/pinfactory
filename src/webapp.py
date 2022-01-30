@@ -4,11 +4,9 @@
 # Import standard python modules.
 from hashlib import sha1
 import hmac
-import json
 import logging
 import os
 import subprocess
-import time
 
 # Import certain classes.
 from authlib.flask.client import OAuth
