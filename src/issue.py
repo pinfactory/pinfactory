@@ -32,7 +32,7 @@ class Issue(object):
         self.offer_volume = offer_volume
 
     def __eq__(self, other):
-        "Compare content of two issues"
+        """Compare content of two issues"""
         return (
             self.id == other.id
             and self.url == other.url
