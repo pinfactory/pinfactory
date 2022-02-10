@@ -584,11 +584,22 @@ def issues():
         return redirect(url_for("issue"))
     if user.banker:
         include_private = True
-    issues = market.get_issues(include_private)
+    project = request.args.get("project")
+    issues = market.get_issues(include_private, project)
+    if project:
+        issueheader = "Issues for project %s" % project
+    else:
+        issueheader = "All issues in the market"
+
     for issue in issues:
         issue.action_button = offer_button(issue)
     return render_template(
-        "issues.html", user=user, form=form, issues=issues, title="Issues"
+        "issues.html",
+        issueheader=issueheader,
+        user=user,
+        form=form,
+        issues=issues,
+        title="Issues",
     )
 
 

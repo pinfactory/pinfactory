@@ -127,7 +127,7 @@ class Issue(object):
             )
 
     @classmethod
-    def get_all(cls, db, include_private=False):
+    def get_all(cls, db, include_private=False, project=None):
         with db.conn.cursor() as curs:
             curs.execute(
                 """SELECT issue.id, issue.modified, issue.url, issue.title, issue.open,
@@ -149,6 +149,8 @@ class Issue(object):
                     is_open=is_open,
                     offer_volume=volume,
                 )
+                if project and not tmp.projectname == project:
+                    continue
                 if include_private or tmp.is_public:
                     yield (tmp)
 

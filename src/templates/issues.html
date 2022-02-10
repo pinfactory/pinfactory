@@ -4,7 +4,7 @@
 {% block app_content %}
 
     <div class="row"><div class="col-md-12">
-    	<h1>All issues in the market</h1>
+		<h1>{{ issueheader }}</h1>
     </div></div>
 
     <div class="row">
@@ -25,7 +25,7 @@
 {% for issue in issues %}
 		<tr{% if not issue.is_open %} class="text-muted"{% endif %}>
 		  <td>{{ issue.datetime }}</td>
-		  <td>{{ issue.projectname }}</td>
+		  <td><a href="/issues?project={{ issue.projectname }}">{{ issue.projectname }}</a></td>
   		  <td>{% if not issue.is_open %}<s>{% endif %} 		  
 		  	<a target="_blank" href="{{ issue.url }}">{{ issue.issuenumber }}
 		  {% if not issue.is_open %}</s>{% endif %} 
