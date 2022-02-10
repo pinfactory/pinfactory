@@ -119,8 +119,8 @@ class Market(object):
     def add_issue(self, user, issue_url):
         return Issue(url=issue_url).persist(self)
 
-    def get_issues(self, include_private=False):
-        return list(Issue.get_all(self, include_private))
+    def get_issues(self, include_private=False, project=None):
+        return list(Issue.get_all(self, include_private, project))
 
     def issue_by_id(self, iid):
         return Issue.by_id(self, iid)
