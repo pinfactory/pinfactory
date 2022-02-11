@@ -45,9 +45,7 @@
     </table>
 
     <p id="advanced" style="margin-top: 0.5ex; min-height: 5ex; visibility: hidden">(The offer is
-    for <input id="quantity" size="5"> units of
-    {{ form.side }} at a price of
-    <input id="price" size="4">
+    for {{ form.quantity(size=3) }} units of {{ form.side }} at a price of {{ form.price(size=3) }}
     with a maturation date of {{ form.maturitydate(size=5) }} {{ form.maturity }}.  Estimated fee: <input id="fee" readonly="readonly" size="3"></input>.)</p>
 
     <div id="win-loss-explain"><p>If this issue is <span id="other-side-dup">resolved as a loss</span> on <b id="maturity-dup-1">the maturation date</b>: You will lose your payment of <input id="detail-invest" readonly="readonly" size="4"></input> tokens.</p>
