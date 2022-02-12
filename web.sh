@@ -28,6 +28,7 @@ docker ps &> /dev/null || dockerfail
 ssh $DATASOURCE true || echo "Can't connect to $DATASOURCE"
 
 mkdir -p data
+echo "-- Test container without sample data" > data/db_dump.sql
 ssh $DATASOURCE pg_dump --user postgres market > data/db_dump.sql || echo "Failed to get live data from $DATASOURCE"
 
 set -e
