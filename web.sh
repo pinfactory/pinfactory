@@ -29,7 +29,11 @@ ssh $DATASOURCE true || echo "Can't connect to $DATASOURCE"
 
 mkdir -p data
 echo "-- Test container without sample data" > data/db_dump.sql
-ssh $DATASOURCE pg_dump --user postgres market > data/db_dump.sql || echo "Failed to get live data from $DATASOURCE"
+
+# Only if this is an admin system with rights, get db dump from the live server
+if [ -e /usr/bin/pass ] && /usr/bin/pass config/market | grep -q config ;  then
+	ssh $DATASOURCE pg_dump --user postgres market > data/db_dump.sql || echo "Failed to get live data from $DATASOURCE"
+fi
 
 set -e
 set -x
