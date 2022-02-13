@@ -32,6 +32,10 @@ cp conf/wsgi.conf /etc/apache2/conf-available
 a2enmod wsgi
 a2enconf wsgi
 
+# Other needed Apache modules
+a2enmod ssl
+a2enmod rewrite
+
 # Set up the database (same as in the container). Web
 # server should be down when database is being worked on.
 systemctl stop apache2
