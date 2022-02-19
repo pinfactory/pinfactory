@@ -24,9 +24,6 @@ rm -rf data
 
 pass config/market > conf/config.py
 
-# ssh $USER@$HOST sudo apt-get -y install rsync
-# ssh $USER@$HOST sudo mkdir -p $DOCROOT
-# ssh $USER@$HOST sudo chown -R $USER $DOCROOT
 rsync -rpt $EXCLUDES src/ $USER@$HOST:$DOCROOT/
 rsync -rpt $EXCLUDES conf $USER@$HOST:$DOCROOT/
 ssh $USER@$HOST sudo $DOCROOT/restart.sh
