@@ -10,6 +10,7 @@
 			  <th>Price</th>
 			  <th>Quantity</th>
 			  {% if not hide_issue %}
+			  <th>Project</th>
 			  <th>Issue number</th>
 			  <th>Issue description</th>
 			  {% endif %}
@@ -30,6 +31,7 @@
 				<td>{{ offer.displayprice }} </td>
 				<td>{{ offer.quantity }}</td>
 				{% if not hide_issue %}
+				<td><a href="/issues?project={{ offer.contract_type.issue.projectname }}">{{ offer.contract_type.issue.projectname }}</a></td>
 				<td><a href="{{ offer.contract_type.issue.url }}" target="_blank">{{ offer.contract_type.issue.issuenumber }}</a></td>
 				<td><a href="/issue/{{ offer.contract_type.issue.id }}">{{ offer.contract_type.issue.displayname }}</a></td>
 				{% endif %}
