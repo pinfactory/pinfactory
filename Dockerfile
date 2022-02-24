@@ -13,7 +13,6 @@ RUN pip3 install -r /srv/market/requirements.txt
 # Copying live data from live site into Docker container.
 
 COPY src/db_setup.sh /srv/market/
-COPY data/db_dump.sql /srv/market/data
 COPY src/pg_hba.conf /srv/market
 COPY src/schema.sql /srv/market
 RUN /srv/market/db_setup.sh
