@@ -16,6 +16,6 @@ pg_isready
 # create the market database if it does not exist already
 echo "SELECT 'CREATE DATABASE market' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'market')\gexec" | psql --user postgres
 
-[ -e data/db_dump.sql ] && psql --user postgres market < data/db_dump.sql
+psql --user postgres market < db_dump.sql
 psql --user postgres -d market -f schema.sql
 service postgresql stop
