@@ -10,7 +10,12 @@
 #where the script lives.
 DATASOURCE=market@market.pinfactory.org
 
-trap popd EXIT
+cleanup(){
+	mv src/db_dump.bak src/db_dump.sql
+	popd
+}
+
+trap 'cleanup' EXIT
 pushd $PWD &> /dev/null
 cd $(dirname "$0")
 
@@ -27,12 +32,10 @@ dockerfail() {
 docker ps &> /dev/null || dockerfail
 ssh $DATASOURCE true || echo "Can't connect to $DATASOURCE"
 
-mkdir -p data
-echo "-- Test container without sample data" > data/db_dump.sql
-
 # Only if this is an admin system with rights, get db dump from the live server
 if [ -e /usr/bin/pass ] && /usr/bin/pass config/market | grep -q config ;  then
-	ssh $DATASOURCE pg_dump --user postgres market > data/db_dump.sql || echo "Failed to get live data from $DATASOURCE"
+	cp src/db_dump.sql src/db_dump.bak
+	ssh $DATASOURCE pg_dump --user postgres market > src/db_dump.sql || echo "Failed to get live data from $DATASOURCE"
 fi
 
 set -e
@@ -42,7 +45,6 @@ set -x
 #to have 2 installs in 2 different directories with suitable modifications to the
 #port number and the tag market_web.
 docker build --tag=market_web .
-
 #We are setting the environment variable in Flask to specify that webapp.py is
 #the application we want to run. Running happens in the last line below.
 docker run \
