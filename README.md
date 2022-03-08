@@ -3,37 +3,34 @@
 A futures market for trading on the status of software
 bugs and issues.
 
-
 ## Setup
 
 This project has three prerequisites on the development
 system: bash, curl, and Docker (or a Docker-compatible
-container system).   See "Getting started".
-
+container system). See "Getting started".
 
 ## Design
 
 This project has two priorities: correctness and testability.
 
- * we use a database schema that makes it as easy
-   as possible to express market operations as simple
-   queries.
+- we use a database schema that makes it as easy
+  as possible to express market operations as simple
+  queries.
 
- * we use constraints and triggers at the database level
-   to avoid putting the market into a hard-to-understand
-   state even in the event of an application bug
+- we use constraints and triggers at the database level
+  to avoid putting the market into a hard-to-understand
+  state even in the event of an application bug
 
- * we put a simple object-oriented layer on top of the
-   database, with methods to expose what is happening
+- we put a simple object-oriented layer on top of the
+  database, with methods to expose what is happening
 
- * this all makes it possible to write test code in natural
-   language, to make it straightforward to translate
-   use cases and user stories into tests.
+- this all makes it possible to write test code in natural
+  language, to make it straightforward to translate
+  use cases and user stories into tests.
 
- * Database transactions are market transactions.  The whole
-   transaction should fail if there is a database inconsistency
-   or error.
-
+- Database transactions are market transactions. The whole
+  transaction should fail if there is a database inconsistency
+  or error.
 
 ## Research funding
 
@@ -49,11 +46,10 @@ open access publishing of the paper was provided
 by the University of Nebraska at Omaha Libraries'
 Open Access Fund.
 
-
 ## Prices and quantities
 
 All prices are expressed as the price of the
-fixed side.  In the UI prices will be displayed
+fixed side. In the UI prices will be displayed
 in the range 0 to 1, which translates nicely into
 "the market believes that the probability of this bug
 getting fixed is P." Internally prices are stored as
@@ -69,17 +65,36 @@ units. One unit represents a payout of one token
 contract is resolved.
 
 The position table uses negative numbers for UNFIXED
-positions, positive numbers for FIXED.  There are no
+positions, positive numbers for FIXED. There are no
 zero positions.
 
-
 ## Getting started
+
+### On Windows
+
+Windows 10. Docker version 20.10.12, build e91ed57. Visual Studio Code v1.65.
+
+Ensure to have downloaded Docker and follow the runs on their platform.
+
+On the installation of docker, run `docker build .`.
+
+On completion, run the following commands:
+
+```
+./test.sh
+```
+
+Next run:
+
+```
+./web.sh
+```
 
 ### On Linux
 
 Install Docker (or a compatible container tool that provides the
 `docker` command) from the package
-manager and start it with the service manager.  Check your
+manager and start it with the service manager. Check your
 distribution's instructions.
 
 Test that you can connect with:
@@ -96,7 +111,6 @@ sudo groupadd docker && sudo gpasswd -a ${USER} docker && sudo systemctl restart
 newgrp docker
 ```
 
-
 ### On Mac OS
 
 [Install Docker Desktop for
@@ -104,22 +118,20 @@ Mac](https://docs.docker.com/docker-for-mac/install/).
 (You do not need to make a Docker Hub account, just
 start Docker.)
 
-
 ## run tests
 
 Run the tests in a container.
 
-	./test.sh
+    ./test.sh
 
 (Docker must be running and you must be able to connect to it.)
-
 
 ## Use the web application in a demo environment
 
 This script will attempt to copy data from the live
 site, then start a local copy in a container.
 
-	./web.sh
+    ./web.sh
 
 Visit the site at: http://localhost:5000/
 
@@ -127,11 +139,10 @@ Your changes in the `src` directory will show up in
 the container, and Flask is configured to auto-reload
 when you modify anything.
 
-
 ## Clean up Docker containers and images
 
 This script is only for development systems where you
-aren't using Docker for other things.  **Don't run
+aren't using Docker for other things. **Don't run
 this script on a production system.**
 
     ./cleanup.sh
@@ -141,7 +152,6 @@ system packages installed (because these images take
 a while to build and don't change often) and removes
 all the other images.
 
-
 ## Modify Pinfactory code
 
 [The New and Improved Flask Mega-Tutorial, by Miguel
@@ -149,7 +159,6 @@ Grinberg](https://courses.miguelgrinberg.com/p/flask-mega-tutorial)
 covers all the background material you will need to know. We
 encourage pull requests that are still at the "work in progress"
 stage, and will help you get them ready to merge.
-
 
 # Dependencies
 
@@ -161,31 +170,29 @@ stage, and will help you get them ready to merge.
 
 **Python packages**
 
- * Altair: Graphing.
+- Altair: Graphing.
 
- * Authlib: OAuth support.
+- Authlib: OAuth support.
 
- * psycopg2: Widely used adapter for PostgreSQL.
+- psycopg2: Widely used adapter for PostgreSQL.
 
- * flask: Full-featured but relatively simple web development framework.
+- flask: Full-featured but relatively simple web development framework.
 
- * flask-bootstrap: Package to integrate Bootstrap with Flask templates.
+- flask-bootstrap: Package to integrate Bootstrap with Flask templates.
 
- * flask-wtf: Flask support for WTForms
+- flask-wtf: Flask support for WTForms
 
- * loginpass: Wrapper for OAuth, with support for GitHub.
+- loginpass: Wrapper for OAuth, with support for GitHub.
 
- * WTForms: Form building and validation package with CSRF protection
+- WTForms: Form building and validation package with CSRF protection
 
 **Vega: front end visualizations**
-
 
 # Third parties
 
 **GitHub:** Used for login.
 
 FIXME: CDNs for Bootstrap and Vega resources?
-
 
 # References
 
@@ -214,6 +221,4 @@ Mega-Tutorial](https://courses.miguelgrinberg.com/p/flask-mega-tutorial)
 
 [WTForms Documentation](https://wtforms.readthedocs.io/en/stable/index.html)
 
-
-[modeline]: # ( vim: set fenc=utf-8 spell spl=en autoindent textwidth=72 tabstop=4 shiftwidth=4 expandtab softtabstop=4: )
-
+[modeline]: # " vim: set fenc=utf-8 spell spl=en autoindent textwidth=72 tabstop=4 shiftwidth=4 expandtab softtabstop=4: "
