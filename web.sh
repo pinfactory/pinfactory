@@ -45,7 +45,7 @@ set -x
 #to have 2 installs in 2 different directories with suitable modifications to the
 #port number and the tag market_web.
 docker build --tag=market_web .
-#We are setting the environment variable in Flask to specify that webapp.py is
+#We are setting the environment	 variable in Flask to specify that webapp.py is
 #the application we want to run. Running happens in the last line below.
 docker run \
 	-p 5000:5000 \

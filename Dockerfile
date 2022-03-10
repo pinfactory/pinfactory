@@ -16,6 +16,7 @@ COPY src/db_setup.sh /srv/market
 COPY src/db_dump.sql /srv/market
 COPY src/pg_hba.conf /srv/market
 COPY src/schema.sql /srv/market
+# COPY src/ /srv/market/
 RUN /srv/market/db_setup.sh
 RUN service postgresql stop
 
