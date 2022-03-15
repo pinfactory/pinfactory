@@ -1,88 +1,102 @@
-{% extends 'bootstrap/base.html' %}
-
-{% block head %}
-	{{super()}}
-	<link rel="alternate" type="application/rss+xml" title="RSS feed" href="/feed" />
-{% endblock %}
-
-{% block title %}
-    {% if title %}{{ title }}{% else %}market.pinfactory.org{% endif %}
-{% endblock %}
-
-{% block navbar %}
-    <nav class="navbar navbar-default">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="{{ url_for('index') }}">market</a>
-            </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                {% if not hidenav %}<ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('contracts') }}">Contracts</a></li>
-                    <li><a href="{{ url_for('offers') }}">Offers</a></li>
-                    <li><a href="{{ url_for('issues') }}">Issues</a></li>
-		    {% if user and user.oracle %}
-                        <li><a href="{{ url_for('resolve') }}">Resolve</a></li>
-		    {% endif %}
-                    {% if user and user.banker %}
-		    	<li><a href="{{ url_for('history') }}">History</a></li>
-		    {% endif %}
-                </ul>{% endif %}
-                <ul class="nav navbar-nav navbar-right">
-		{% if user %}
-                    <li><a href="{{ url_for('userinfo') }}">{{ user.username }}</a></li>
-                    <li><a id="balance">{{ user.display_balance }}</a></li>
-		    <li><a href="/">{{ user.display_date }}</a></li>
-                    <li><a href="{{ url_for('logout') }}">Log out</a></li>
-		{% else %}
-                    <li><a href="{{ url_for('login') }}">Log in with GitHub</a></li>
-		{% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-{% endblock %}
-
-{% block content %}
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-info" role="alert">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-        {# application content needs to be provided in the app_content block #}
-        {% block app_content %}{% endblock %}
+{% extends 'bootstrap/base.html' %} {% block head %} {{super()}}
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="RSS feed"
+  href="/feed"
+/>
+{% endblock %} {% block title %} {% if title %}{{ title }}{% else
+%}market.pinfactory.org{% endif %} {% endblock %} {% block navbar %}
+<nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <button
+        type="button"
+        class="navbar-toggle collapsed"
+        data-toggle="collapse"
+        data-target="#bs-example-navbar-collapse-1"
+        aria-expanded="false"
+      >
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{ url_for('index') }}">market</a>
     </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      {% if not hidenav %}
+      <ul class="nav navbar-nav">
+        <li><a href="{{ url_for('contracts') }}">Contracts</a></li>
+        <li><a href="{{ url_for('offers') }}">Offers</a></li>
+        <li><a href="{{ url_for('issues') }}">Issues</a></li>
+        {% if user and user.oracle %}
+        <li><a href="{{ url_for('resolve') }}">Resolve</a></li>
+        {% endif %} {% if user and user.banker %}
+        <li><a href="{{ url_for('history') }}">History</a></li>
+        {% endif %}
+      </ul>
+      {% endif %}
+      <ul class="nav navbar-nav navbar-right">
+        {% if user %}
+        <li><a href="{{ url_for('userinfo') }}">{{ user.username }}</a></li>
+        <li><a id="balance">{{ user.display_balance }}</a></li>
+        <li><a href="/">{{ user.display_date }}</a></li>
+        <li><a href="{{ url_for('logout') }}">Log out</a></li>
+        {% else %}
+        <li><a href="{{ url_for('login') }}">Log in with GitHub</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %} {% block content %}
+<div class="container">
+  {% with messages = get_flashed_messages() %} {% if messages %} {% for message
+  in messages %}
+  <div class="alert alert-info" role="alert">{{ message }}</div>
+  {% endfor %} {% endif %} {% endwith %} {# application content needs to be
+  provided in the app_content block #} {% block app_content %}{% endblock %}
+</div>
 
-    <!-- Begin common footer for all Pinfactory sites:         --
+<!-- Begin common footer for all Pinfactory sites:         --
       -- Make changes to all sites if changing anything here.  -->
-    <footer class="footer">
-	<div class="container">
-		<span class="text-muted">Copyright 2017-2022 Pinfactory contributors</span>&nbsp;&nbsp;
-		<a target="_blank" href="https://market.pinfactory.org/">market.pinfactory.org</a>&nbsp;&nbsp;
-		<a target="_blank" href="https://www.pinfactory.org/privacy/">Privacy&nbsp;policy</a>&nbsp;&nbsp;
-		<a target="_blank" href="https://github.com/pinfactory/pinfactory">source&nbsp;code</a>
-	</div>
-    </footer>
-    <!-- End common footer -->
+<footer class="footer">
+  <div class="container">
+    <span class="text-muted">Copyright 2017-2022 Pinfactory contributors</span
+    >&nbsp;&nbsp;
+    <a target="_blank" href="https://market.pinfactory.org/"
+      >market.pinfactory.org</a
+    >&nbsp;&nbsp;
+    <a target="_blank" href="https://www.pinfactory.org/privacy/"
+      >Privacy&nbsp;policy</a
+    >&nbsp;&nbsp;
+    <a target="_blank" href="https://github.com/pinfactory/pinfactory"
+      >source&nbsp;code</a
+    >
+  </div>
+</footer>
+<!-- End common footer -->
 
-{% endblock %}
+{% endblock %} (# "super" includes the scripts and stylesheets from the default
+Bootstrap template. #} {% block scripts %} {{super()}}
+<script src="/static/market.js"></script>
+<script type="module">
+  import { ethers } from "https://cdn.ethers.io/lib/ethers-5.2.esm.min.js";
+  // Your code here...
+  // A Web3Provider wraps a standard Web3 provider, which is
+  // what MetaMask injects as window.ethereum into each page
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-(# "super" includes the scripts and stylesheets from the default Bootstrap template. #}
-{% block scripts %}
-	{{super()}}
-	<script src="/static/market.js"></script>
-{% endblock %}
+  // MetaMask requires requesting permission to connect users accounts
+  await provider.send("eth_requestAccounts", []);
 
-{% block styles %}
-	{{super()}}
-	<link rel="stylesheet" href="/static/market.css">
+  // The MetaMask plugin also allows signing transactions to
+  // send ether and pay to change state within the blockchain.
+  // For this, you need the account signer...
+  const signer = provider.getSigner();
+  console.log(signer);
+</script>
+{% endblock %} {% block styles %} {{super()}}
+<link rel="stylesheet" href="/static/market.css" />
 {% endblock %}
