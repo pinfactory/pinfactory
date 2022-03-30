@@ -77,7 +77,7 @@ class Market(object):
                     user=config.DB_USER,
                     host=config.DB_HOST,
                     port=config.DB_PORT,
-                    password=config.DB_PASSWORD
+                    password=config.DB_PASSWORD,
                 )
                 if i > 0:
                     logging.info("Connected to database after %d attempt(s)." % i)
