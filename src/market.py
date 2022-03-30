@@ -73,11 +73,11 @@ class Market(object):
         for i in range(5):
             try:
                 self.conn = psycopg2.connect(
-                    dbname=(os.environ.get("DBNAME", default="") or config.DB_NAME),
-                    user=(os.environ.get("PGUSER", default="") or config.DB_USER),
-                    host=(os.environ.get("PGHOST", default="") or config.DB_HOST),
-                    port=(os.environ.get("PGPORT", default="") or config.DB_PORT),
-                    password=os.environ.get("PGPASSWORD", default="")
+                    dbname=config.DB_NAME,
+                    user=config.DB_USER,
+                    host=config.DB_HOST,
+                    port=config.DB_PORT,
+                    password=config.DB_PASSWORD
                 )
                 if i > 0:
                     logging.info("Connected to database after %d attempt(s)." % i)
