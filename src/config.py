@@ -9,9 +9,9 @@ DB_PORT = environ.get("DB_PORT", default="5432")
 DB_PASSWORD = environ.get("DB_PASSWORD", default="")
 
 SECRET_KEY = "localhost"
-GITHUB_CLIENT_ID = environ.get('GITHUB_CLIENT_ID', default="Iv1.025402c3c3c5e51c")
+GITHUB_CLIENT_ID = environ.get("GITHUB_CLIENT_ID", default="Iv1.025402c3c3c5e51c")
 GITHUB_CLIENT_SECRET = environ.get(
-    'GITHUB_CLIENT_SECRET', default="4424183d39afa4b5272cb9e114b99adbb46720e4"
+    "GITHUB_CLIENT_SECRET", default="4424183d39afa4b5272cb9e114b99adbb46720e4"
 )
 
 GITHUB_WEBHOOK_SECRET = environ.get("GITHUB_WEBHOOK_SECRET", default="xyzzy")
