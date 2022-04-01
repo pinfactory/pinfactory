@@ -4,4 +4,4 @@ from waitress import serve
 from webapp import app
 from os import environ
 
-serve(app, host="0.0.0.0", port=environ.get("PORT", default="80"))
+serve(app, host="0.0.0.0", port=environ.get("PORT", default="80"), url_scheme="https")
