@@ -5,6 +5,7 @@ import logging
 
 import psycopg2
 
+
 # Maturity has an id to help to join it to other tables. See schema.sql.
 class Maturity(object):
     def __init__(self, maturity, mid=None):

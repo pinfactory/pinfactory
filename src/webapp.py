@@ -9,7 +9,6 @@ import os
 import subprocess
 
 # Import certain classes.
-from authlib.flask.client import OAuth
 from flask import (
     Flask,
     abort,
@@ -21,8 +20,8 @@ from flask import (
     session,
     url_for,
 )
+
 from flask_bootstrap import Bootstrap
-from loginpass import create_flask_blueprint, GitHub
 
 from market import Market
 from form import (
@@ -34,8 +33,6 @@ from form import (
     OffsetForm,
     ResolveForm,
 )
-
-OAUTH_BACKENDS = [GitHub]
 
 # FIXME use a real cache
 # Cache our login info.
@@ -57,9 +54,8 @@ class Cache(object):
 # Basic setup
 app = Flask(__name__)
 app.config.from_pyfile("config.py")
+print(app.config)
 bootstrap = Bootstrap(app)
-oauth = OAuth(app, Cache())
-
 
 def handle_authorize(remote, token, user_info):
     app.logger.debug(user_info)
@@ -247,6 +243,14 @@ def issue_page(iid):
         contracts=contracts,
         messages=messages,
     )
+
+@app.route("/fakeissue")
+def fakeissue():
+    if "development" != app.config.get("ENV"):
+        abort(404)
+    issue = market.issue_by_url('http://localhost/fakeorg/fakeproject/1', 'Fake Issue', True)
+    app.logger.debug("fake issue %s", issue)
+    return redirect(url_for("issue_page", iid=1))
 
 
 @app.route("/offer/<iid>", methods=["GET"])
@@ -684,27 +688,20 @@ def webhook():
 # This lets us use Github for logins. Note: the "defs" are just defining functions.
 # They are only run when invoked. So this code gets run after the basic setup is
 # complete.
-github_bp = create_flask_blueprint(GitHub, oauth, handle_authorize)
-app.register_blueprint(github_bp, url_prefix="/github")
+
 app.logger.setLevel(logging.DEBUG)
 
-temporary_process = False
-if "development" == app.config.get("ENV"):
-    if not os.environ.get("WERKZEUG_RUN_MAIN"):
-        # This is the process that will be killed and restarted.
-        temporary_process = True
 app.logger.info("App %s started. Env is %s" % (__name__, app.config.get("ENV")))
 app.logger.debug("Logging at DEBUG level.")
 
-# Market object gets created here, unless this is a temporary process.
-if temporary_process:
-    market = None
-else:
-    market = Market(applog=app.logger)
-    app.logger.debug("Market connected.")
-    market.setup()
+print("env is ", app.config.get("ENV"))
 
-if "development" == app.config.get("ENV") and not temporary_process:
+# Market object gets created here, unless this is a temporary process.
+market = Market(applog=app.logger)
+app.logger.debug("Market connected.")
+market.setup()
+
+if "development" == app.config.get("ENV"):
     app.logger.info(
         """
 

@@ -18,3 +18,6 @@ GITHUB_WEBHOOK_SECRET = environ.get("GITHUB_WEBHOOK_SECRET", default="xyzzy")
 
 # Show the match button if the offer is your own.
 MATCH_OWN_OFFERS = True
+
+DEBUG = True
+ENV = 'development'
