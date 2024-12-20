@@ -9,12 +9,9 @@ DB_PORT = environ.get("DB_PORT", default="5432")
 DB_PASSWORD = environ.get("DB_PASSWORD", default="")
 
 SECRET_KEY = "localhost"
-GITHUB_CLIENT_ID = environ.get("GITHUB_CLIENT_ID", default="Iv1.025402c3c3c5e51c")
-GITHUB_CLIENT_SECRET = environ.get(
-    "GITHUB_CLIENT_SECRET", default="4424183d39afa4b5272cb9e114b99adbb46720e4"
-)
 
-GITHUB_WEBHOOK_SECRET = environ.get("GITHUB_WEBHOOK_SECRET", default="xyzzy")
+GITHUB_CLIENT_ID = "Iv23liEsuc2nx88BSlur"
+GITHUB_CLIENT_SECRET = "9a30643ff1c0eab0c55d4b678503f016ce987e64"
 
 # Show the match button if the offer is your own.
 MATCH_OWN_OFFERS = True
