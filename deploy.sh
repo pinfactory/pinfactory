@@ -24,6 +24,6 @@ rm -rf data
 
 pass config/market > conf/config.py
 
-rsync -rpt $EXCLUDES src/ $USER@$HOST:$DOCROOT/
+rsync --del -rpt $EXCLUDES src/ $USER@$HOST:$DOCROOT/
 rsync -rpt $EXCLUDES conf $USER@$HOST:$DOCROOT/
 ssh $USER@$HOST sudo $DOCROOT/restart.sh

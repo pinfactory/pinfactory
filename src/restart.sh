@@ -10,7 +10,7 @@ cd $(dirname "$0")
 
 # Application config file. (Overwrite the version used
 # for testing in a container)
-mv conf/config.py .
+cp conf/config.py .
 
 # Dependencies
 apt-get update
