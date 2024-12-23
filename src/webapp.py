@@ -35,6 +35,7 @@ from form import (
     ResolveForm,
 )
 
+
 # FIXME use a real cache
 # Cache our login info.
 class Cache(object):
@@ -58,6 +59,7 @@ app.config.from_pyfile("config.py")
 print(app.config)
 bootstrap = Bootstrap(app)
 
+
 # old function do not use
 def handle_authorize(remote, token, user_info):
     app.logger.debug(user_info)
@@ -75,22 +77,29 @@ def handle_authorize(remote, token, user_info):
         return redirect(where)
     return redirect(url_for("index"))
 
+
 def redeem_github_code(code):
-    r = requests.post("https://github.com/login/oauth/access_token",
-                      data = {'client_id': app.config.get('GITHUB_CLIENT_ID'),
-                              'client_secret': app.config.get('GITHUB_CLIENT_SECRET'),
-                              'code': code },
-                      headers = {'Accept': 'application/json'}
-                      )
+    r = requests.post(
+        "https://github.com/login/oauth/access_token",
+        data={
+            "client_id": app.config.get("GITHUB_CLIENT_ID"),
+            "client_secret": app.config.get("GITHUB_CLIENT_SECRET"),
+            "code": code,
+        },
+        headers={"Accept": "application/json"},
+    )
     res_json = r.json()
-    access_token = res_json['access_token']
+    access_token = res_json["access_token"]
     app.logger.debug("Got access token %s" % access_token)
 
     # Get the user details using the method from https://julesjaypaulynice.com/login-with-github-flask-react/
-    r = requests.get("https://api.github.com/user", headers={
-                         'Accept': 'application/json',
-                         'Authorization': 'token {}'.format(access_token)
-                     })
+    r = requests.get(
+        "https://api.github.com/user",
+        headers={
+            "Accept": "application/json",
+            "Authorization": "token {}".format(access_token),
+        },
+    )
     if r.status_code != 200:
         raise NotImplementedError
     user_info = r.json()
@@ -99,7 +108,8 @@ def redeem_github_code(code):
         host="GitHub",
         sub=user_info["id"],
         username=user_info["login"],
-        profile=user_info["html_url"])
+        profile=user_info["html_url"],
+    )
     session["host"] = user.host
     session["sub"] = user.sub
     where = session.get("destination")
@@ -107,6 +117,7 @@ def redeem_github_code(code):
         del session["destination"]
         return redirect(where)
     return redirect(url_for("index"))
+
 
 def get_user():
     user = market.lookup_user(host=session.get("host"), sub=session.get("sub"))
@@ -157,10 +168,10 @@ def timejump():
 # data you see once the platform is up and running).
 @app.route("/")
 def index():
-    code = request.args.get('code')
+    code = request.args.get("code")
     if code:
         app.logger.info("Got code %s" % code)
-        return(redeem_github_code(code))
+        return redeem_github_code(code)
 
     has_balance = False
     try:
@@ -229,8 +240,11 @@ def offers():
 
 @app.route("/login")
 def login():
-    return redirect("https://github.com/login/oauth/authorize?client_id=%s" %
-        app.config.get('GITHUB_CLIENT_ID'))
+    return redirect(
+        "https://github.com/login/oauth/authorize?client_id=%s"
+        % app.config.get("GITHUB_CLIENT_ID")
+    )
+
 
 @app.route("/result")
 def result():
@@ -277,11 +291,14 @@ def issue_page(iid):
         messages=messages,
     )
 
+
 @app.route("/fakeissue")
 def fakeissue():
     if "development" != app.config.get("ENV"):
         abort(404)
-    issue = market.issue_by_url('http://localhost/fakeorg/fakeproject/1', 'Fake Issue', True)
+    issue = market.issue_by_url(
+        "http://localhost/fakeorg/fakeproject/1", "Fake Issue", True
+    )
     app.logger.debug("fake issue %s", issue)
     return redirect(url_for("issue_page", iid=1))
 

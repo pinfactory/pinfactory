@@ -17,4 +17,4 @@ GITHUB_CLIENT_SECRET = "9a30643ff1c0eab0c55d4b678503f016ce987e64"
 MATCH_OWN_OFFERS = True
 
 DEBUG = True
-ENV = 'development'
+ENV = "development"
