@@ -15,7 +15,7 @@ class OfferForm(FlaskForm):
         "quantity", validators=[DataRequired(), NumberRange(1, None)]
     )
     price = DecimalField(
-        "price", places=3, validators=[DataRequired(), NumberRange(0, 1)]
+        "price", places=3, validators=[DataRequired(), NumberRange(0.001, 0.999)]
     )
     side = SelectField(
         "side",

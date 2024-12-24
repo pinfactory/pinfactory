@@ -36,7 +36,7 @@ class Maturity(object):
         current_year = datetime.now().year
         maturity_year = self.maturity.year
         if current_year != maturity_year:
-            return self.maturity.strftime("%d %b %Y") 
+            return self.maturity.strftime("%d %b %Y")
         return self.maturity.strftime("%d %b")
 
     @property

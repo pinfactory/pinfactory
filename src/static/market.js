@@ -72,7 +72,11 @@ function copyFromTopSection() {
 function copyFromForm() {
 	var side = copyElement("side", "fund-fix");
 	setLabels(side);
+	console.log("side is " + side);
 	var maturity = getNumber("maturity", 0);
+	if (maturity) {
+		document.getElementById('cmd-mid').innerHTML = maturity.value;	
+	}
 	var el = document.getElementById("maturity-" + maturity);
 	if (el) {
 		el.classList.add("active");
@@ -93,6 +97,12 @@ function copyFromForm() {
 
 	setNumber("funder-pays", funderPays, 0);
 	setNumber("worker-pays", workerPays, 0);
+	el = document.getElementById("cmd-price");
+	el.innerHTML = price;
+	if (side) {
+		el = document.getElementById("cmd-side");
+		el.innerHTML = side;
+	}
 }
 
 function recalculateFields(event) {
@@ -106,6 +116,7 @@ function recalculateFields(event) {
 		maturity.value = mid;
 		maturitydate.value = event.target.title;
 		event.target.classList.add("active");
+		document.getElementById('cmd-mid').innerHTML = maturity.value;
 	} else if (event.target.id === "funder-pays" || event.target.id === "worker-pays" || event.target.id === "fund-fix") {
 		copyFromTopSection();
 	} else {
@@ -115,8 +126,8 @@ function recalculateFields(event) {
 		document.getElementById('maturity-dup-1').innerHTML = maturitydate.value;
 		document.getElementById('maturity-dup-2').innerHTML = maturitydate.value;
 	} else {
-		document.getElementById('maturity-dup-1').innerHTML = 'the maturation date';
-		document.getElementById('maturity-dup-2').innerHTML = 'the maturation date';
+		document.getElementById('maturity-dup-1').innerHTML = 'the maturity date';
+		document.getElementById('maturity-dup-2').innerHTML = 'the maturity date';
 	}
 	calculateFee();
 	return;
@@ -169,25 +180,10 @@ function calculateFee() {
 	document.getElementById('win-loss-explain').style.visibility = 'visible';
 }
 
-function hideAdvanced() {
-	document.getElementById('advanced').style.visibility = 'hidden';
-	document.getElementById('hide-advanced').style.display = 'none';
-	document.getElementById('show-advanced').style.display = 'inline';
-	return false;
-}
-
-function showAdvanced() {
-	document.getElementById('advanced').style.visibility = 'visible';
-	document.getElementById('hide-advanced').style.display = 'inline';
-	document.getElementById('show-advanced').style.display = 'none';
-	return false;
-}
-
 function setupFields() {
 	if (!document.getElementById("offerForm")) {
 		return;
 	}
-	hideAdvanced();
 	const inputs = document.querySelectorAll("a, input, select, button");
 	inputs.forEach(el => {
 		if (el.type === "hidden" || el.type === "submit") {
