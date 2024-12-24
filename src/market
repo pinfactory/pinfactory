@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+
+import argparse
+import logging
+import sys
+
+from market import Market
+
+def place_offer(iid, mid, side, price, quantity):
+    try:
+        user = market.lookup_user(host="local", sub=1001,
+                                  username="trading bot", profile="https://market.pinfactory.org/bots")
+        logging.debug("user is %s" % user)
+    except:
+        logging.error("user not found")
+        sys.exit(1)
+
+    price = float(price)
+    price = int(price * 1000)
+    if price < 0 or price > 1000:
+        raise RuntimeError
+    quantity = int(quantity)
+    iid = int(iid)
+    mid = int(mid)
+
+    user.add_balance(quantity * price + 1000)
+    user.persist()
+
+    user = market.lookup_user(host="local", sub=1001)
+    logging.debug("user is %s" % user)
+
+    if side == "FIXED":
+        side = True
+    if side == "UNFIXED":
+        side = False
+
+    res = market.place_order(user, iid, mid, side, price, quantity)
+    logging.debug("offer placed")
+
+
+if __name__ == '__main__':
+    global logging
+    logging.basicConfig(level=logging.DEBUG)
+    print(logging)
+    logging.debug("starting market...")
+    market = Market(applog=logging)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--side')
+    parser.add_argument('-p', '--price')
+    parser.add_argument('-q', '--quantity')
+    parser.add_argument('--iid')
+    parser.add_argument('--mid')
+    parser.add_argument('rest', nargs='*')
+    args = parser.parse_args()
+    if ['offer'] != args.rest:
+        print("Usage: market offer  --side=UNFIXED --price=0.9 --iid=3 --mid=76")
+        sys.exit(1)
+    place_offer(args.iid, args.mid, args.side, args.price, args.quantity)
+
+
