@@ -75,7 +75,7 @@ class Account(object):
             self.db = db
         if self._balance != int(self._balance):
             raise RuntimeError
-        with db.conn.cursor() as curs:
+        with self.db.conn.cursor() as curs:
             if self.id is not None:
                 curs.execute(
                     """UPDATE account SET system = %s, banker = %s, oracle = %s,
@@ -125,11 +125,11 @@ class Account(object):
                         self.profile,
                     ),
                 )
-            db.messages.add(
+            self.db.messages.add(
                 "new_account",
                 text="New account %s created: %s %s" % (self.id, self.host, self.sub),
             )
-            db.messages.flush(curs)
+            self.db.messages.flush(curs)
             curs.connection.commit()
         return self
 
@@ -154,6 +154,10 @@ class Account(object):
         with self.db.conn.cursor() as curs:
             curs.execute("SELECT balance FROM account WHERE id = %s", (self.id,))
             return curs.fetchone()[0]
+
+    def add_balance(self, bonus):
+        "Add an amount in millitokens"
+        self._balance += bonus
 
     @property
     def total(self):
@@ -216,8 +220,7 @@ class Account(object):
             acct = cls.get_by_oauth(curs, host, sub, db)
             if acct is None:
                 if username is None or profile is None:
-                    logging.warning("No username or profile for %s" % sub)
-                    return None
+                    raise NotImplementedError
                 acct = cls(host=host, sub=sub, username=username, profile=profile)
                 acct.persist(db)
                 curs.connection.commit()
