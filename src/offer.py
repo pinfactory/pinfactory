@@ -122,13 +122,16 @@ class Offer(object):
         self,
         account,
         contract_type,
-        side,
-        price,
+        side,  # Market.FIXED or Market.UNFIXED
+        price,  # Integer 1 to 999
         quantity,
         oid=None,
         created=None,
         all_or_nothing=False,
     ):
+        assert price == int(price)
+        assert price >= 1 and price <= 999
+        assert quantity == int(quantity)
         self.id = oid
         self.account = account
         self.contract_type = contract_type

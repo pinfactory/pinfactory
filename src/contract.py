@@ -144,7 +144,7 @@ class ContractType(object):
         try:
             return ("/").join(self.issue.url.split("/")[3:5])
         except Exception as e:
-            return "an open source project"
+            return "a project at %s" % self.issue.url
 
     def persist(self):
         with self.db.conn.cursor() as curs:

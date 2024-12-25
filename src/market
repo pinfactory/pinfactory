@@ -10,7 +10,6 @@ def place_offer(iid, mid, side, price, quantity):
     try:
         user = market.lookup_user(host="local", sub=1001,
                                   username="trading bot", profile="https://market.pinfactory.org/bots")
-        logging.debug("user is %s" % user)
     except:
         logging.error("user not found")
         sys.exit(1)
@@ -27,7 +26,6 @@ def place_offer(iid, mid, side, price, quantity):
     user.persist()
 
     user = market.lookup_user(host="local", sub=1001)
-    logging.debug("user is %s" % user)
 
     if side == "FIXED":
         side = True
@@ -35,14 +33,12 @@ def place_offer(iid, mid, side, price, quantity):
         side = False
 
     res = market.place_order(user, iid, mid, side, price, quantity)
-    logging.debug("offer placed")
+    logging.info(res)
 
 
 if __name__ == '__main__':
     global logging
     logging.basicConfig(level=logging.DEBUG)
-    print(logging)
-    logging.debug("starting market...")
     market = Market(applog=logging)
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--side')

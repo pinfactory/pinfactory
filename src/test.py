@@ -128,6 +128,19 @@ class MarketTestCase(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             testuser = testuser.persist(testdb)
 
+    def test_lookup_new_user(self):
+        "New account with zero balance is made when user is looked up."
+        market = Market()
+        newuser = market.lookup_user(
+            host="local", sub=1002, username="test.py", profile="https://localhost/"
+        )
+        self.assertEqual(0, newuser.balance)
+        newuser.add_balance(10_000)
+        newuser.persist()
+        testuser = market.lookup_user(host="local", sub=1002)
+        self.assertEqual(newuser, testuser)
+        self.assertEqual(10_000, newuser.balance)
+
     def test_add_issue(self):
         "Create an issue with timestamp."
         testdb = Market()
@@ -250,7 +263,7 @@ class MarketTestCase(unittest.TestCase):
         self.assertEqual(1, len(user_messages))
         self.assertEqual(msglist[0].id, user_messages[0].id)
         self.assertEqual(good_test_offer, testdb.offer.filter(account=testuser)[0])
-        with self.assertRaises(psycopg2.errors.CheckViolation):
+        with self.assertRaises(AssertionError):
             testdb.offer(testuser, test_contract_type, Market.FIXED, -1, 100).place()
 
     def test_filter_offers(self):
@@ -358,7 +371,7 @@ class MarketTestCase(unittest.TestCase):
         testdb = Market()
         testuser = Account(balance=10000).persist(testdb)
         test_contract_type = self.make_contract_type(testdb)
-        with self.assertRaises(psycopg2.errors.CheckViolation):
+        with self.assertRaises(AssertionError):
             testdb.offer(testuser, test_contract_type, Market.FIXED, 0, 0).place()
 
     def test_fail_add_late_offer(self):
@@ -1339,6 +1352,23 @@ class MarketTestCase(unittest.TestCase):
         self.assertEqual("offer_created", mlist[0].mclass)
         testoffer.cancel()
         self.assertEqual(50000, testfixer.balance)
+
+    def test_user_balance_after_offer(self):
+        market = Market()
+        newuser = market.lookup_user(
+            host="local",
+            sub=1003,
+            username="test_user_balance_after_offer",
+            profile="https://localhost/3",
+        )
+        newuser.add_balance(10000)
+        newuser.persist()
+        ctype = self.make_contract_type(market)
+        mid = ctype.maturity.id
+        iid = ctype.issue.id
+        market.place_order(newuser, iid, mid, Market.FIXED, 100, 100)
+        user = market.lookup_user(host="local", sub=1003)
+        self.assertEqual(0, user.balance)
 
 
 if __name__ == "__main__":

@@ -47,15 +47,11 @@ class Market(object):
     # you need to perform sql queries into the database (retrieve or input data).
     def __init__(self, applog=None):
         global logging
-        print("1 logging is ", logging)
         if applog is not None:
             logging = applog
             self.logging = applog
         else:
             self.logging = logging
-        print("2 logging is ", logging)
-        logging.debug("starting stuff")
-        print("3 logging is ", logging)
         self.system_id = None
         self.messages = MessageList(self)
         self.contract_type = ContractType
