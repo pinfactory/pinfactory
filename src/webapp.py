@@ -680,9 +680,10 @@ def permission_denied(e):
 # a change happens at their end.
 @app.route("/webhook", methods=["POST"])
 def webhook():
+    app.logger.debug("starting webhook")
     signature = request.headers.get("X-Hub-Signature", "")
     if signature:
-        app.logger.info("Received webhook signature %s" % signature)
+        app.logger.debug("Received webhook signature %s" % signature)
         signature = signature.split("=")[1]
     else:
         app.logger.warning("Missing webhook signature")
@@ -694,8 +695,8 @@ def webhook():
         )
         app.logger.warning("signature: %s" % signature)
         app.logger.warning("hmac digest: %s" % mac.hexdigest())
-        # FIXME
-        #  return 'OK'
+        app.logger.warning("Stop processing of webhook")
+        return "Wrong or missing X-Hub-Signature header", 400
     else:
         app.logger.debug("Good signature in webhook.")
 
@@ -704,12 +705,11 @@ def webhook():
         action = payload.get("action")
     except AttributeError:
         app.logger.warning("Failed to get JSON from webhook request")
-        # FIXME: raise an error here
-        return "OK"
+        return "Bad or missing JSON content", 400
 
     app.logger.debug("Webhook action is %s" % action)
     if not action in ("opened", "edited", "deleted", "closed", "reopened"):
-        return "OK"
+        return "OK", 200
     try:
         issue_url = payload["issue"]["html_url"]
         if payload["issue"]["state"] == "open":
@@ -718,7 +718,7 @@ def webhook():
             is_open = False
     except Exception as e:
         app.logger.info("Could not get issue URL or state from webhook payload: %s" % e)
-        return "OK"
+        return "OK", 200
     try:
         issue_title = payload["issue"]["title"]
         app.logger.info(
@@ -732,12 +732,8 @@ def webhook():
         app.logger.info("Successfully processed webhook for %s" % issue)
     except Exception as e:
         app.logger.warning("Failed to create or update issue from webhook: %s" % e)
-    return "OK"
+    return "OK", 200
 
-
-# This lets us use Github for logins. Note: the "defs" are just defining functions.
-# They are only run when invoked. So this code gets run after the basic setup is
-# complete.
 
 app.logger.setLevel(logging.DEBUG)
 
