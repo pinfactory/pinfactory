@@ -463,11 +463,11 @@ def offset():
     app.logger.debug(session)
     app.logger.debug("destination: %s" % destination)
     flash(
-        '''
+        """
         This offer, if accepted by another trader, will offset your existing position with
         no gain or loss to you. You can edit before submitting, then click the Place Offer button
         to submit it to the market.
-        '''
+        """
     )
     return redirect(destination)
 

@@ -131,7 +131,7 @@ class Position(object):
 
     def offset(self):
         "Returns a new offer that if accepted would cancel out this position."
-        total_price = self.basis # total millitokens paid for this position
+        total_price = self.basis  # total millitokens paid for this position
         account = self.account
         contract_type = self.contract_type
         side = not self.side
