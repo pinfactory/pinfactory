@@ -610,11 +610,11 @@ def offset_form(position):
     form = OffsetForm()
     try:
         form.position.data = int(position.id)
-        form.price.data = 0.5
         return form
-    except:
+    except Exception as e:
         app.logger.error(
-            "Can't make offset form for %s with id: %s" % (position, position.id)
+            "Can't make offset form for %s with id: %s because of exception %s"
+            % (position, position.id, e)
         )
         return "<!-- failed to make offset form for %s -->" % position
 
