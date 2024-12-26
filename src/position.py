@@ -129,14 +129,15 @@ class Position(object):
                 )
         return result
 
-    def offset(self, total_price):
+    def offset(self):
         "Returns a new offer that if accepted would cancel out this position."
+        total_price = self.basis # total millitokens paid for this position
         account = self.account
         contract_type = self.contract_type
         side = not self.side
-        price = (total_price) / abs(self.quantity)
+        quantity = abs(self.quantity)
+        price = int(total_price / quantity)
         if not self.side:
             price = 1000 - price
-        quantity = abs(self.quantity)
-        tmp = self.db.offer(account, contract_type, side, price, quantity)
-        return tmp
+        offsetting_offer = self.db.offer(account, contract_type, side, price, quantity)
+        return offsetting_offer

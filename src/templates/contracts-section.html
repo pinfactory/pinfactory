@@ -29,9 +29,7 @@
                 <br>{{ contract.display_total_unfixed_price }} (UNFIXED side)</td>
 
                 {% if true %}<td><form method="POST" action="{{ url_for('offset') }}" class="form" role="form">
-                		 Enter a price to offer to resell your entire position.
                          <br>{{ contract.offset_form.position }}
-						 {{ contract.offset_form.price(size=5) }}
                 		 {{ contract.offset_form.submit }}
            		 </form></td>{% endif %}
 			</tr>{% endfor %}

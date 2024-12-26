@@ -63,10 +63,4 @@ class MatchButton(FlaskForm):
 
 class OffsetForm(FlaskForm):
     position = HiddenField("position")
-    # FIXME: add label to show this is a 0-1 price
-    price = DecimalField(
-        "price",
-        places=3,
-        validators=[DataRequired("Enter a price between 0 and 1."), NumberRange(0, 1)],
-    )
-    submit = SubmitField("Sell contract")
+    submit = SubmitField("Trade")

@@ -454,15 +454,7 @@ def offset():
     except IndexError:
         flash("Could not location position to offset.")
         return redirect(request.referrer)
-    price = 0
-    try:
-        price = int(form.price.data)
-    except:
-        pass
-    if not price:
-        flash("Enter a positive integer to offer to sell your position.")
-        return redirect(request.referrer)
-    offset = position.offset(price * 1000)
+    offset = position.offset()
     session["price"] = "%.3f" % (offset.price / 1000)
     session["side"] = offset.displayside
     session["quantity"] = str(offset.quantity)
@@ -471,7 +463,11 @@ def offset():
     app.logger.debug(session)
     app.logger.debug("destination: %s" % destination)
     flash(
-        "Generated offer to offset your position. Click the Place Offer button to place it."
+        '''
+        This offer, if accepted by another trader, will offset your existing position with
+        no gain or loss to you. You can edit before submitting, then click the Place Offer button
+        to submit it to the market.
+        '''
     )
     return redirect(destination)
 
@@ -614,6 +610,7 @@ def offset_form(position):
     form = OffsetForm()
     try:
         form.position.data = int(position.id)
+        form.price.data = 0.5
         return form
     except:
         app.logger.error(
