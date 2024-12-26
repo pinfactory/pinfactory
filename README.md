@@ -163,8 +163,6 @@ stage, and will help you get them ready to merge.
 
  * Altair: Graphing.
 
- * Authlib: OAuth support.
-
  * psycopg2: Widely used adapter for PostgreSQL.
 
  * flask: Full-featured but relatively simple web development framework.
@@ -182,7 +180,7 @@ stage, and will help you get them ready to merge.
 
 # Third parties
 
-**GitHub:** Used for login.
+**GitHub:** Used for login and issue tracking integration.
 
 FIXME: CDNs for Bootstrap and Vega resources?
 
@@ -190,8 +188,6 @@ FIXME: CDNs for Bootstrap and Vega resources?
 # References
 
 [Altair: Declarative Visualization in Python](https://altair-viz.github.io/)
-
-[Authlib: Python Authentication](https://docs.authlib.org/en/latest/index.html)
 
 [Bootstrap](https://getbootstrap.com/)
 
