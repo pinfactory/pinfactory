@@ -20,6 +20,7 @@ class Graph:
                 """SELECT created, url, matures, class, side, price, quantity, issue
                             FROM ticker WHERE (issue = %s OR %s)
                             AND (class = 'contract_created' OR class = 'contract_resolved')
+                            AND created >= (CURRENT_DATE - INTERVAL '30 days')
                             ORDER BY created;
                          """,
                 (issue, all_issues),
