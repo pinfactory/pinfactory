@@ -265,6 +265,10 @@ class Offer(object):
         return "%.3f" % (self.price / 1000)
 
     @property
+    def totalprice(self):
+        return "%.3f" % (int(self.price * self.quantity)/1000)
+
+    @property
     def displayside(self):
         if self.side:
             return "FIXED"

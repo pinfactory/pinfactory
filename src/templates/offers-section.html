@@ -1,3 +1,4 @@
+<!-- begin offers-section.html template -->
 <div class="row">
 	<div class="col-md-12">
       <div class="table-responsive">
@@ -5,16 +6,16 @@
           <thead>
             <tr>
 				<th>&nbsp;</th>
-              <th>Date {% if issue %}offer{% endif %} placed</th>
-			  <th>Position</th>
-			  <th>Price</th>
-			  <th>Quantity</th>
 			  {% if not hide_issue %}
-			  <th>Project</th>
-			  <th>Issue number</th>
-			  <th>Issue description</th>
+			  <th>Issue</th>
 			  {% endif %}
+
+			  <th>Position</th>
+			  <th>Quantity</th>
+			  <th>Unit Price</th>
+			  <th>Total Price</th>
 			  <th>Maturity date</th>
+              <th>Date {% if issue %}offer{% endif %} placed</th>
               <th>&nbsp;</th>
               <th>&nbsp;</th>
             </tr>
@@ -26,16 +27,22 @@
 				<td>{% if offer.account == user %}
 					<span class="my-offer-dot">●</a>
 				{% endif %}</td>
-				<td>{{ offer.datetime }}</td>
-				<td>{{ offer.displayside }}</td>
-				<td>{{ offer.displayprice }} </td>
-				<td>{{ offer.quantity }}</td>
+
 				{% if not hide_issue %}
-				<td><a href="/issues?project={{ offer.contract_type.issue.projectname }}">{{ offer.contract_type.issue.projectname }}</a></td>
-				<td><a href="{{ offer.contract_type.issue.url }}" target="_blank">{{ offer.contract_type.issue.issuenumber }}</a></td>
-				<td><a href="/issue/{{ offer.contract_type.issue.id }}">{{ offer.contract_type.issue.displayname }}</a></td>
+				<td>{{ offer.contract_type.issue.projectname }}/{{ offer.contract_type.issue.issuenumber }}
+                                <br>{{ offer.contract_type.issue.displayname }}
+                                <br><a href="/issue/{{ offer.contract_type.issue.id }}">(marketplace)</a>
+                			<a href="{{ offer.contract_type.issue.url }}" target="_blank">(GitHub)</a>
+				</td>
 				{% endif %}
+
+				<td>{{ offer.displayside }}</td>
+				<td>{{ offer.quantity }}</td>
+				<td>{{ offer.displayprice }} </td>
+				<td>{{ offer.totalprice }}</td>
+
 				<td>{{ offer.contract_type.maturity.display }}</td>
+				<td>{{ offer.datetime }}</td>
 				<td><form method="POST" action="{{ url_for('cancel') }}" class="form" role="form">
                 		{{ offer.cancel_button.offer }}
                 		{{ offer.cancel_button.submit }}
@@ -50,3 +57,4 @@
 {% endfor %}
 	</tbody></table>
 </div></div></div>
+<!-- end offers-section.html template -->
