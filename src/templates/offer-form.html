@@ -43,26 +43,34 @@
         </td></tr>
     </table>
 
-    <p id="advanced">(The offer is for {{ form.quantity(size=4) }} units of {{ form.side }} at a price of {{ form.price(size=5) }}
+	<p>&nbsp;</p>
+
+    <p id="advanced">The offer is for {{ form.quantity(size=4) }} units of {{ form.side }} at a price of {{ form.price(size=5) }}
     with a maturity date of {{ form.maturitydate(size=10) }} {{ form.maturity }}.
-	Estimated fee: <input id="fee" readonly="readonly" size="3"></input>.)</p>
+	<span class="nobr">Estimated fee: <input id="fee" readonly="readonly" size="3"></input>.</span></p>
 
     <div id="win-loss-explain">
 	  <p>If this issue is <span id="other-side-dup">resolved as a loss</span> on <b id="maturity-dup-1">the maturity date</b>:
 	  You will lose your payment of <input id="detail-invest" readonly="readonly" size="4"></input> tokens.</p>
 
       <p>If this issue is <span id="this-side-dup">resolved as a win</span> on <b id="maturity-dup-2">the maturity date</b>:
-	  You will receive the contract payout, which reflects a transaction fee of
-	  <input id="detail-fee" readonly="readonly" size="3"></input> tokens, calculated based on 
-       10% of your anticipted profit.</p>
+	  You will receive the contract payout of <input readonly="readonly" size="5" id="contract-payout-dup"></input> tokens,
+	  <span class="nobr">which reflects a transaction fee of
+	  <input id="detail-fee" readonly="readonly" size="3"></input> tokens,</span>
+	  calculated based on 10% of your anticipted profit.</p>
 	</div>
 
     <p>
         {{ form.submit(class_="btn btn-primary btn-lg") }}
     </p>
 
-	<p><code>market offer --side=<span id="cmd-side">_</span> --price=<span id="cmd-price">NaN</span>
-	  --iid={{issue.id}} --mid=<span id="cmd-mid">NaN</span></code><p>
+	<p><tt>market offer
+		--side=<span id="cmd-side">_</span> 
+		--quantity=<span id="cmd-quantity">NaN</span>
+		--price=<span id="cmd-price">NaN</span>
+		--iid={{issue.id}}
+		--mid=<span id="cmd-mid">NaN</span>
+	</tt><p>
 
 </form><!-- end include offer-form -->
 

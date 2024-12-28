@@ -75,12 +75,15 @@ function copyFromForm() {
 	console.log("side is " + side);
 	var maturity = getNumber("maturity", 0);
 	if (maturity) {
-		document.getElementById('cmd-mid').innerHTML = maturity.value;	
+		el = document.getElementById('cmd-mid');
+		el.innerHTML = maturity;
 	}
 	var el = document.getElementById("maturity-" + maturity);
 	if (el) {
 		el.classList.add("active");
 		maturitydate.value = el.title;
+                document.getElementById('maturity-dup-1').innerHTML = el.title;
+                document.getElementById('maturity-dup-2').innerHTML = el.title;
 	} else {
 		// Clear the hidden maturity
 		maturitydate.value = '';
@@ -99,6 +102,8 @@ function copyFromForm() {
 	setNumber("worker-pays", workerPays, 0);
 	el = document.getElementById("cmd-price");
 	el.innerHTML = price;
+	el = document.getElementById("cmd-quantity");
+	el.innerHTML = quantity;
 	if (side) {
 		el = document.getElementById("cmd-side");
 		el.innerHTML = side;
@@ -156,7 +161,8 @@ function calculateFee() {
 	setNumber("detail-invest", invest, 0);
 	setNumber("fee", fee, 0);
 	setNumber("detail-fee", fee, 0);
-	setNumber("contract-payout", quantity - fee, 0)
+	setNumber("contract-payout", quantity - fee, 0)	
+	setNumber("contract-payout-dup", quantity - fee, 0)
 	var submitButton = document.getElementById('submit');
 	// var explain = document.getElementById('explain');
 	if (getNumber("maturity", 1) < 1) {
