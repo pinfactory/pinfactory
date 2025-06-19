@@ -266,7 +266,7 @@ class Offer(object):
 
     @property
     def totalprice(self):
-        return "%.3f" % (int(self.price * self.quantity)/1000)
+        return "%.3f" % (int(self.price * self.quantity) / 1000)
 
     @property
     def displayside(self):
