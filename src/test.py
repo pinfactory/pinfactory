@@ -1000,15 +1000,19 @@ class MarketTestCase(unittest.TestCase):
         testdb.offer(testfixer, test_contract_type, Market.FIXED, 100, 10).place()
 
         user_position = testdb.position.filter(account=testuser)[0]
-        user_offset = user_position.offset(9000)
-        self.assertEqual(user_offset.price, 100)
-        user_offset = user_position.offset(8000)
-        self.assertEqual(user_offset.price, 200)
         fixer_position = testdb.position.filter(account=testfixer)[0]
-        fixer_offset = fixer_position.offset(1000)
-        self.assertEqual(user_offset.price, 200)
-        fixer_offset = fixer_position.offset(2000)
-        self.assertEqual(user_offset.price, 200)
+        self.assertEqual(user_position.quantity, -10)
+        self.assertEqual(fixer_position.quantity, 10)
+
+        user_offset = user_position.offset()
+        self.assertEqual(user_offset.price, 100)
+        user_offset = user_position.offset()
+        self.assertEqual(user_offset.price, 100)
+
+        fixer_offset = fixer_position.offset()
+        self.assertEqual(user_offset.price, 100)
+        fixer_offset = fixer_position.offset()
+        self.assertEqual(user_offset.price, 100)
         user_offset.place()
         fixer_offset.place()
         self.assertEqual([], testdb.position.filter(account=testuser))
