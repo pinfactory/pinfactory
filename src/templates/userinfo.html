@@ -15,7 +15,9 @@
 			<iframe src="/measure_frame" allowfullscreen></iframe>
 		</div>
 
-	<p>{% if user and user.banker %}<a href="/ticker" target="_blank" class="btn btn-primary">Download recent activity (CSV)</a>{% endif %}	
+	<p>
+		{% if user and user.banker %}<a href="/ticker" target="_blank" class="btn btn-primary">Download recent activity (CSV)</a>{% endif %}
+		{% if user and user.banker %}<a href="/make-agent" target="_blank" class="btn btn-primary">Make agent account</a>{% endif %}
 	</p>
     </div></div>
 
