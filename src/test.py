@@ -1393,6 +1393,7 @@ class MarketTestCase(unittest.TestCase):
         user = market.lookup_user(host="local", sub=1004)
         self.assertEqual(10000, user.balance)
 
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     demo_db = Market()
