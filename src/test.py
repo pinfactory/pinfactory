@@ -1374,6 +1374,24 @@ class MarketTestCase(unittest.TestCase):
         user = market.lookup_user(host="local", sub=1003)
         self.assertEqual(0, user.balance)
 
+    def test_user_balance_after_cancel(self):
+        market = Market()
+        newuser = market.lookup_user(
+            host="local",
+            sub=1004,
+            username="test_user_balance_after_cancel",
+            profile="https://localhost/4",
+        )
+        newuser.add_balance(10000)
+        newuser.persist()
+        ctype = self.make_contract_type(market)
+        mid = ctype.maturity.id
+        iid = ctype.issue.id
+        market.place_order(newuser, iid, mid, Market.FIXED, 100, 100)
+        offer2 = market.offer.filter(account=newuser)[0]
+        offer2.cancel()
+        user = market.lookup_user(host="local", sub=1004)
+        self.assertEqual(10000, user.balance)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
