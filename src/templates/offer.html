@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% import 'bootstrap/wtf.html' as wtf %}
-
 {% block app_content %}
+{% include 'issue-section.html' %}
 
-    <div class="row">
-        <div class="col-md-9">{% include 'offer-form.html' %}</div>
-    </div>
+<div class="row">
+    <div class="col-md-9">{% include 'offer-form.html' %}</div>
+</div>
 
 {% endblock %}
