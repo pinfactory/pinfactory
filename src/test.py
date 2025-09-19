@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import timedelta, timezone
+from datetime import datetime,timedelta, timezone
 import logging
 import signal
 import sys
@@ -334,6 +334,20 @@ class MarketTestCase(unittest.TestCase):
         self.assertEqual(0, len(list(testdb.offer.filter(account=testuser))))
         self.assertEqual(testuser.total, 1000)
         testdb.offer(testuser, test_contract_type, Market.FIXED, 100, 10).place()
+        self.assertEqual(testuser.total, 1000)
+
+    def test_add_and_expire_offer(self):
+        testdb = Market()
+        testuser = Account(balance=1000).persist(testdb)
+        test_contract_type = self.make_contract_type(testdb)
+        test_offer = testdb.offer(testuser, test_contract_type, Market.FIXED, 100, 10, expires=datetime.now())
+        mlist = test_offer.place()
+        self.assertEqual(testuser.total, 1000)
+        self.assertEqual(1, len(list(testdb.offer.filter(account=testuser))))
+        testdb.conn.commit()
+        testdb = Market()
+        testdb.cleanup()
+        self.assertEqual([], list(testdb.offer.filter(account=testuser)))
         self.assertEqual(testuser.total, 1000)
 
     def test_place_offer_and_cancel_offer_from_new_session(self):
@@ -1397,6 +1411,7 @@ class MarketTestCase(unittest.TestCase):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     demo_db = Market()
-    unittest.main()
+    unittest.util._MAX_LENGTH = 2048
+    unittest.main(failfast=True)
 
 # vim: autoindent textwidth=100 tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python

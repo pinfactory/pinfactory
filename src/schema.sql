@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS offer (
 	id SERIAL PRIMARY KEY,
 	account INT REFERENCES account(id),
 	created TIMESTAMP NOT NULL DEFAULT NOW(),
+	expires TIMESTAMP DEFAULT NULL, /* NULL: never expires */
 	contract_type INT REFERENCES contract_type(id),
 	side BOOLEAN NOT NULL, /* true fixed false unfixed */
 	price BIGINT NOT NULL CHECK (price >= 0 AND price <= 1000), /* price of the "fixed" side in millitokens */
@@ -131,7 +132,7 @@ CREATE VIEW offer_overview AS
 	SELECT maturity.id AS maturity, maturity.matures,
 	contract_type.id AS contract_type,
 	issue.id AS issue, issue.url, issue.title,
-	offer.id, offer.account AS account, offer.side, offer.price, offer.quantity, offer.created, offer.all_or_nothing
+	offer.id, offer.account AS account, offer.side, offer.price, offer.quantity, offer.created, offer.all_or_nothing, offer.expires
 	FROM maturity JOIN contract_type ON maturity.id = contract_type.matures
 	INNER JOIN issue ON issue.id = contract_type.issue
 	INNER JOIN offer ON contract_type.id = offer.contract_type;
@@ -144,7 +145,7 @@ CREATE VIEW offer_overview AS
 -- calculate the oracle fee)
 --An account can only have one position given a contract type. However a contract_type
 --can have multiple different accounts, for a given position. In the UI these
---are displayed as different offers/contracts (equivalent to piling on). 
+--are displayed as different offers/contracts (equivalent to piling on).
 CREATE TABLE IF NOT EXISTS position (
 	id SERIAL PRIMARY KEY,
 	account INT REFERENCES account(id),
@@ -217,7 +218,7 @@ INSERT INTO account (system, balance) SELECT true, 0
 
 -- create the default project  if it does not exist
 INSERT INTO project (url) VALUES ('https://github.com/pinfactory/pinfactory')
-	ON CONFLICT (url) DO NOTHING; 
+	ON CONFLICT (url) DO NOTHING;
 
 -- all done
 INSERT INTO message (class, recipient, message)

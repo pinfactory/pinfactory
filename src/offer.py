@@ -99,7 +99,7 @@ class Offer(object):
             )
 
     def make_offer(
-        self, curs, account, contract_type, side, price, quantity, all_or_nothing
+        self, curs, account, contract_type, side, price, quantity, all_or_nothing, expires=None
     ):
         if side == self.db.UNFIXED:
             total = (1000 - price) * quantity
@@ -109,9 +109,9 @@ class Offer(object):
             "UPDATE account SET balance = balance - %s WHERE id = %s", (total, account)
         )
         curs.execute(
-            """INSERT INTO offer (account, contract_type, side, price, quantity, all_or_nothing)
-            VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""",
-            (account, contract_type.id, side, price, quantity, all_or_nothing),
+            """INSERT INTO offer (account, contract_type, side, price, quantity, all_or_nothing, expires)
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+            (account, contract_type.id, side, price, quantity, all_or_nothing, expires),
         )
         self.id = curs.fetchone()[0]
         self.db.messages.add(
@@ -128,6 +128,7 @@ class Offer(object):
         oid=None,
         created=None,
         all_or_nothing=False,
+        expires=None
     ):
         assert price == int(price)
         assert price >= 1 and price <= 999
@@ -140,6 +141,7 @@ class Offer(object):
         self.quantity = quantity
         self.created = created
         self.all_or_nothing = all_or_nothing
+        self.expires = expires
         if not self.contract_type.id:
             raise NotImplementedError
 
@@ -159,7 +161,12 @@ class Offer(object):
             logging.debug(
                 "%s doesn't match %s" % (self.contract_type, other.contract_type)
             )
-            return false
+            return False
+        if self.expires != other.expires:
+                logging.debug(
+                    "expires %s doesn't match %s" % (self.expires, other.expires)
+                )
+                return False
         return (
             self.side == other.side
             and self.price == other.price
@@ -173,12 +180,16 @@ class Offer(object):
         aon = ""
         if self.all_or_nothing:
             aon = " (all or nothing)"
-        return "%s Offer for %d units at %.3f on %s%s" % (
+        expires = ""
+        if self.expires:
+            expires = " expires %s" % self.expires.strftime("%Y-%m-%d")
+        return "%s Offer for %d units at %.3f on %s%s%s" % (
             which,
             self.quantity,
             self.price / 1000,
             self.contract_type,
             aon,
+            expires
         )
 
     @classmethod
@@ -211,9 +222,9 @@ class Offer(object):
                 """SELECT account,
                             maturity, matures,
                             contract_type, issue, url, title,
-                            side, price, quantity, id, created, 
-                            all_or_nothing
-                            FROM offer_overview WHERE 
+                            side, price, quantity, id, created,
+                            all_or_nothing, expires
+                            FROM offer_overview WHERE
                             (id = %s OR %s) AND
                             (account = %s OR %s) AND
                             (issue = %s OR %s)
@@ -235,6 +246,7 @@ class Offer(object):
                     oid,
                     created,
                     all_or_nothing,
+                    expires,
                 ) = row
                 account = Account(uid=uid)
                 issue = Issue(url=url, iid=iid, title=title)
@@ -252,12 +264,17 @@ class Offer(object):
                         oid,
                         created,
                         all_or_nothing,
+                        expires,
                     )
                 )
         return result
 
     @property
     def datetime(self):
+        return self.created.strftime("%d %b %H:%M")
+
+    @property
+    def expiretime(self):
         return self.created.strftime("%d %b %H:%M")
 
     @property
@@ -285,7 +302,7 @@ class Offer(object):
         result = []
         with self.db.conn.cursor() as curs:
             if self.side == self.db.FIXED:
-                curs.execute(
+                curs.execute( # FIXME don't match expired offers
                     """SELECT id, account, price, quantity, all_or_nothing
                                 FROM offer WHERE contract_type = %s AND side = %s and price <= %s
                                 ORDER BY price, created""",
@@ -327,9 +344,10 @@ class Offer(object):
                         self.price,
                         self.quantity,
                         self.all_or_nothing,
+                        self.expires
                     )
             else:  # side is UNFIXED
-                curs.execute(
+                curs.execute( #FIXME don't match expired offers
                     """SELECT id, account, price, quantity, all_or_nothing
                                 FROM offer WHERE contract_type = %s AND side = %s and price >= %s
                                 ORDER BY price DESC, created""",
@@ -348,7 +366,7 @@ class Offer(object):
                     self.reduce_offer(curs, i, csize)
                     contract_price = (
                         self.price
-                    )  # FIXME whoever gets an offer in first should get the best price (?)
+                    )
                     self.make_contract(
                         curs,
                         contract_type=self.contract_type,
@@ -369,6 +387,7 @@ class Offer(object):
                         self.price,
                         self.quantity,
                         self.all_or_nothing,
+                        self.expires,
                     )
             result = self.db.messages.flush(curs)
             curs.connection.commit()
@@ -397,6 +416,7 @@ class Offer(object):
             curs.connection.commit()
             return result
 
+
     @classmethod
     def cleanup(cls, db, contract_types=[]):
         """
@@ -422,6 +442,14 @@ class Offer(object):
             for row in curs.fetchall():
                 expired.append(row[0])
 
+        with db.conn.cursor() as curs:
+            curs.execute(
+                """SELECT offer.id FROM offer WHERE expires IS NOT NULL AND expires <= %s""",
+                (when,),
+            )
+            for row in curs.fetchall():
+                expired.append(row[0])
+
         for oid in expired:
             offer = cls.by_id(oid)
             with db.conn.cursor() as curs:
@@ -438,7 +466,7 @@ class Offer(object):
                 db.messages.add(
                     "info",
                     offer.account.id,
-                    text="An offer from you has been cancelled because the maturity date is in the past.",
+                    text="An offer from you has expired because its expiration or the maturity date of the contract is in the past.",
                 )
                 db.messages.flush(curs)
                 curs.connection.commit()
