@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from datetime import datetime,timedelta, timezone
+from datetime import datetime, timedelta, timezone
 import logging
 import signal
 import sys
@@ -340,7 +340,9 @@ class MarketTestCase(unittest.TestCase):
         testdb = Market()
         testuser = Account(balance=1000).persist(testdb)
         test_contract_type = self.make_contract_type(testdb)
-        test_offer = testdb.offer(testuser, test_contract_type, Market.FIXED, 100, 10, expires=datetime.now())
+        test_offer = testdb.offer(
+            testuser, test_contract_type, Market.FIXED, 100, 10, expires=datetime.now()
+        )
         mlist = test_offer.place()
         self.assertEqual(testuser.total, 1000)
         self.assertEqual(1, len(list(testdb.offer.filter(account=testuser))))
