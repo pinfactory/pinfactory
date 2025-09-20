@@ -1373,6 +1373,30 @@ class MarketTestCase(unittest.TestCase):
         testoffer.cancel()
         self.assertEqual(50000, testfixer.balance)
 
+    def test_fail_match_expired_offer(self):
+        """
+        An offer fails to match an expired offer.
+        """
+        testdb = Market()
+        testuser = Account(balance=50000).persist(testdb)
+        testfixer = Account(balance=50000).persist(testdb)
+        test_contract_type = self.make_contract_type(testdb)
+
+        testdb.offer(
+            testuser,
+            test_contract_type,
+            Market.UNFIXED,
+            500,
+            100,
+            expires=datetime.now(),
+        ).place()
+        testoffer = testdb.offer(testfixer, test_contract_type, Market.FIXED, 500, 100)
+        mlist = testoffer.place()
+        self.assertEqual(1, len(mlist))
+        self.assertEqual("offer_created", mlist[0].mclass)
+        testoffer.cancel()
+        self.assertEqual(50000, testfixer.balance)
+
     def test_user_balance_after_offer(self):
         market = Market()
         newuser = market.lookup_user(

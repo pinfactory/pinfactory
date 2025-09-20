@@ -308,9 +308,9 @@ class Offer(object):
         result = []
         with self.db.conn.cursor() as curs:
             if self.side == self.db.FIXED:
-                curs.execute(  # FIXME don't match expired offers
+                curs.execute(
                     """SELECT id, account, price, quantity, all_or_nothing
-                                FROM offer WHERE contract_type = %s AND side = %s and price <= %s
+                                FROM offer WHERE (expires IS NULL OR expires > NOW()) AND contract_type = %s AND side = %s and price <= %s
                                 ORDER BY price, created""",
                     (self.contract_type.id, self.db.UNFIXED, self.price),
                 )
@@ -353,9 +353,9 @@ class Offer(object):
                         self.expires,
                     )
             else:  # side is UNFIXED
-                curs.execute(  # FIXME don't match expired offers
+                curs.execute(
                     """SELECT id, account, price, quantity, all_or_nothing
-                                FROM offer WHERE contract_type = %s AND side = %s and price >= %s
+                                FROM offer WHERE (expires IS NULL OR expires > NOW()) AND contract_type = %s AND side = %s and price >= %s
                                 ORDER BY price DESC, created""",
                     (self.contract_type.id, self.db.FIXED, self.price),
                 )
