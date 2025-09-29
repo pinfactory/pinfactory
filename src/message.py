@@ -18,6 +18,7 @@ class Message(object):
         side=None,
         price=None,
         quantity=None,
+        expires=None,
         offer=None,
         contract=None,
         text=None,
@@ -31,6 +32,7 @@ class Message(object):
         self.side = side
         self.price = price
         self.quantity = quantity
+        self.expires = expires
         self.offer = offer
         self.contract = contract
         self.text = text
@@ -57,15 +59,11 @@ class Message(object):
             all_accounts = True
 
         result = []
-        # Cursor object for the database driver. Database can have different
-        # queries. curs points to this particular query. curs.execute runs a
-        # SQL statement that you pass to the database. The result of this
-        # execution can then be "fetched".
         with cls.db.conn.cursor() as curs:
             curs.execute(
                 """SELECT issue, url, title, maturity, matures,
                             id, class, created,
-                            contract_type, side, price, quantity, message
+                            contract_type, side, price, quantity, expires, message
                             FROM message_overview
                             WHERE (%s OR issue = %s)
                             AND (%s OR recipient = %s)
@@ -89,6 +87,7 @@ class Message(object):
                     side,
                     price,
                     quantity,
+                    expires,
                     text,
                 ) = row
                 if ticker and (not url or not title or not matures or not maturity_id):
@@ -111,6 +110,7 @@ class Message(object):
                         quantity=quantity,
                         text=text,
                         created=created,
+                        expires=expires,
                         mid=mid,
                     )
                 )
@@ -128,8 +128,8 @@ class Message(object):
             ctype = self.contract_type.id
         curs.execute(
             """INSERT INTO message (class, recipient,
-                                           contract_type, side, price, quantity, message)
-                                           VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                           contract_type, side, price, quantity, expires, message)
+                                           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                                            RETURNING id""",
             (
                 self.mclass,
@@ -138,6 +138,7 @@ class Message(object):
                 self.side,
                 self.price,
                 self.quantity,
+                self.expires,
                 str(self),
             ),
         )
@@ -156,11 +157,15 @@ class Message(object):
         if self.side == True:
             whichside = "FIXED"
         if self.mclass == "offer_created":
-            return "Offer made: %d units of %s on %s at a (fixed) price of %.3f" % (
+            exp = " (never expires)"
+            if self.expires:
+                exp = " (expires %s)" % self.expires.strftime("%d %b %H:%M")
+            return "Offer made: %d units of %s on %s at a (fixed) price of %.3f%s" % (
                 self.quantity,
                 whichside,
                 self.contract_type,
                 self.price / 1000,
+                exp,
             )
         if self.mclass == "offer_cancelled":
             return (
@@ -180,14 +185,6 @@ class Message(object):
                 self.quantity,
             )
         if self.mclass == "contract_resolved":
-            # TODO: Remove this workaround when we no longer have old
-            # resolutions with 1000x quantities and no price
-            if self.price is None:
-                if self.quantity:
-                    self.price = 1000
-                    self.quantity = self.quantity / 1000
-                else:
-                    self.price = 0
             return "Contract resolved: %s for a payout of %d tokens" % (
                 self.contract_type,
                 (self.price * self.quantity) / 1000,
@@ -202,13 +199,13 @@ class Message(object):
         if int(self.price) and int(self.quantity):
             value = ": %d tokens" % ((self.price * self.quantity) / 1000)
         if self.mclass == "offer_created" and self.side:
-            return "New developer offer on %s matures %s%s" % (
+            return "New FIXED offer on %s matures %s%s" % (
                 self.contract_type.project,
                 self.contract_type.maturity.display,
                 value,
             )
         if self.mclass == "offer_created":
-            return "New funder offer on %s matures %s%s" % (
+            return "New UNFIXED offer on %s matures %s%s" % (
                 self.contract_type.project,
                 self.contract_type.maturity.display,
                 value,
@@ -250,6 +247,7 @@ class MessageList(collections.UserList):
         side=None,
         price=None,
         quantity=None,
+        expires=None,
         offer=None,
         contract=None,
         text=None,
@@ -264,6 +262,7 @@ class MessageList(collections.UserList):
                 side,
                 price,
                 quantity,
+                expires,
                 offer,
                 contract,
                 text,

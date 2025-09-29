@@ -182,6 +182,7 @@ CREATE TABLE IF NOT EXISTS message (
 	side BOOLEAN,
 	price BIGINT,
 	quantity BIGINT,
+	expires TIMESTAMP DEFAULT NULL, /* NULL: never expires */
 	message TEXT NOT NULL
 );
 
@@ -195,7 +196,7 @@ CREATE VIEW message_overview AS
 	SELECT maturity.id AS maturity, maturity.matures,
 	issue.id AS issue, issue.url, issue.title,
 	message.id, message.class, message.created, message.delivered, message.recipient, message.contract_type,
-	message.side, message.price, message.quantity, message.message
+	message.side, message.price, message.quantity, message.expires, message.message
 	FROM message LEFT OUTER JOIN contract_type ON contract_type.id = message.contract_type
 	LEFT OUTER JOIN maturity ON maturity.id = contract_type.matures
 	LEFT OUTER JOIN issue ON issue.id = contract_type.issue;
@@ -206,7 +207,7 @@ CREATE VIEW ticker AS
 	SELECT DISTINCT maturity.id AS maturity, maturity.matures,
 	contract_type.id AS contract_type,
 	issue.id AS issue, issue.url, issue.title,
-	message.id, message.class, message.side, message.price, message.quantity, message.created
+	message.id, message.class, message.side, message.price, message.quantity, message.expires, message.created
 	FROM maturity JOIN contract_type ON maturity.id = contract_type.matures
 	INNER JOIN issue ON issue.id = contract_type.issue
 	INNER JOIN message ON contract_type.id = message.contract_type

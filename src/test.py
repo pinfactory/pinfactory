@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from ast import Not
 from datetime import datetime, timedelta, timezone
 import logging
 import signal
@@ -265,6 +266,22 @@ class MarketTestCase(unittest.TestCase):
         self.assertEqual(good_test_offer, testdb.offer.filter(account=testuser)[0])
         with self.assertRaises(AssertionError):
             testdb.offer(testuser, test_contract_type, Market.FIXED, -1, 100).place()
+
+    def test_place_offer_that_expires(self):
+        "An offer past its expiration time expires."
+        testdb = Market()
+        testuser = Account(balance=1000000).persist(testdb)
+        test_contract_type = self.make_contract_type(testdb)
+        good_test_offer = testdb.offer(
+            testuser, test_contract_type, Market.FIXED, 500, 100, expires=datetime.now()
+        )
+        good_test_offer.place()
+        testdb.cleanup()
+        messages = testdb.history.filter(account=testuser)
+        cancellation = messages[0]
+        self.assertIn("cancelled", cancellation.text)
+        offers_for_issue = testdb.offer.filter(issue=test_contract_type.issue)
+        self.assertEqual([], offers_for_issue)
 
     def test_filter_offers(self):
         "We can add a good offer and fail to add a bad offer."
