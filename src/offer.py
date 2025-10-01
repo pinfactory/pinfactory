@@ -199,16 +199,26 @@ class Offer(object):
         )
 
     @classmethod
-    def by_id(cls, oid):
+    def by_id(cls, oid, db_cursor=None):
         "Look up offers by id."
+        if db_cursor is None:
+            db_cursor = cls.db.conn.cursor()
         try:
-            return cls.filter(oid=oid, include_private=True)[0]
+            return cls.filter(oid=oid, include_private=True, db_cursor=db_cursor)[0]
         except IndexError:
             return None
 
     @classmethod
-    def filter(cls, oid=None, account=None, issue=None, include_private=False):
-        "Look up offers."
+    def filter(cls, oid=None, account=None, issue=None, include_private=False, db_cursor=None):
+        "Look up offers. This can be called with or without a database cursor."
+        if db_cursor is None: # Top level in this transaction
+            db_cursor = cls.db.conn.cursor()
+            cls._do_expire(db_cursor) # remove any expired offers before searching
+            with db_cursor as curs:
+                result = cls.filter(oid=oid, account=account, issue=issue, include_private=include_private, db_cursor=curs)
+                cls.db.messages.flush(curs)
+                curs.connection.commit()
+                return result
         (all_ids, all_accounts, all_issues) = (False, False, False)
         if not oid:
             all_ids = True
@@ -223,29 +233,47 @@ class Offer(object):
             iid = None
             all_issues = True
         result = []
-        with cls.db.conn.cursor() as curs:
-            curs.execute(
-                """SELECT account,
-                            maturity, matures,
-                            contract_type, issue, url, title,
-                            side, price, quantity, id, created,
-                            all_or_nothing, expires
-                            FROM offer_overview WHERE
-                            (id = %s OR %s) AND
-                            (account = %s OR %s) AND
-                            (issue = %s OR %s)
-                            """,
-                (oid, all_ids, uid, all_accounts, iid, all_issues),
-            )
-            for row in curs.fetchall():
-                (
-                    uid,
-                    mid,
-                    matures,
-                    cid,
-                    iid,
-                    url,
-                    title,
+        curs = db_cursor
+        curs.execute(
+            """SELECT account,
+                        maturity, matures,
+                        contract_type, issue, url, title,
+                        side, price, quantity, id, created,
+                        all_or_nothing, expires
+                        FROM offer_overview WHERE
+                        (id = %s OR %s) AND
+                        (account = %s OR %s) AND
+                        (issue = %s OR %s)
+                        """,
+            (oid, all_ids, uid, all_accounts, iid, all_issues),
+        )
+        for row in curs.fetchall():
+            (
+                uid,
+                mid,
+                matures,
+                cid,
+                iid,
+                url,
+                title,
+                side,
+                price,
+                quantity,
+                oid,
+                created,
+                all_or_nothing,
+                expires,
+            ) = row
+            account = Account(uid=uid)
+            issue = Issue(url=url, iid=iid, title=title)
+            if (not include_private) and (not issue.is_public):
+                continue
+            maturity = Maturity(matures, mid)
+            ctype = ContractType(issue, maturity, cid)
+            result.append(
+                cls(
+                    account,
+                    ctype,
                     side,
                     price,
                     quantity,
@@ -253,26 +281,8 @@ class Offer(object):
                     created,
                     all_or_nothing,
                     expires,
-                ) = row
-                account = Account(uid=uid)
-                issue = Issue(url=url, iid=iid, title=title)
-                if (not include_private) and (not issue.is_public):
-                    continue
-                maturity = Maturity(matures, mid)
-                ctype = ContractType(issue, maturity, cid)
-                result.append(
-                    cls(
-                        account,
-                        ctype,
-                        side,
-                        price,
-                        quantity,
-                        oid,
-                        created,
-                        all_or_nothing,
-                        expires,
-                    )
                 )
+            )
         return result
 
     @property
@@ -421,10 +431,36 @@ class Offer(object):
             return result
 
     @classmethod
+    def _do_expire(cls, curs, oids_to_expire=None):
+        if oids_to_expire is None:
+            oids_to_expire = []
+        curs.execute("SELECT offer.id FROM offer WHERE expires IS NOT NULL AND expires <= NOW()")
+        for row in curs.fetchall():
+            oids_to_expire.append(row[0])
+        for oid in oids_to_expire:
+            offer = cls.filter(oid=oid, db_cursor=curs)[0]
+            cls.reduce_offer(curs, oid, None)
+            cls.db.messages.add(
+                "offer_cancelled",
+                offer.account.id,
+                contract_type=offer.contract_type,
+                side=offer.side,
+                price=offer.price,
+                quantity=offer.quantity,
+                offer=offer,
+            )
+            cls.db.messages.add(
+                "info",
+                offer.account.id,
+                text="An offer from you has expired because its expiration or the maturity date of the contract is in the past.",
+            )
+
+    @classmethod
     def cleanup(cls, db, contract_types=[]):
         """
         Remove any offers on contract types with a maturity date in the past.
         Refund and send a message to the user who placed the offer.
+        This only needs to run after maturity dates have passed.
         """
         expired = []
 
@@ -434,42 +470,14 @@ class Offer(object):
                 if item.contract_type == ctype:
                     expired.append(item.id)
 
-        when = db.now()
         with db.conn.cursor() as curs:
             curs.execute(
                 """SELECT offer.id FROM offer JOIN contract_type ON offer.contract_type = contract_type.id
                             JOIN maturity on contract_type.matures = maturity.id
-                            WHERE maturity.matures <= %s""",
-                (when,),
+                            WHERE maturity.matures <= NOW()"""
             )
             for row in curs.fetchall():
                 expired.append(row[0])
-
-        with db.conn.cursor() as curs:
-            curs.execute(
-                """SELECT offer.id FROM offer WHERE expires IS NOT NULL AND expires <= %s""",
-                (when,),
-            )
-            for row in curs.fetchall():
-                expired.append(row[0])
-
-        for oid in expired:
-            offer = cls.by_id(oid)
-            with db.conn.cursor() as curs:
-                offer.reduce_offer(curs, offer.id, None)
-                db.messages.add(
-                    "offer_cancelled",
-                    offer.account.id,
-                    contract_type=offer.contract_type,
-                    side=offer.side,
-                    price=offer.price,
-                    quantity=offer.quantity,
-                    offer=offer,
-                )
-                db.messages.add(
-                    "info",
-                    offer.account.id,
-                    text="An offer from you has expired because its expiration or the maturity date of the contract is in the past.",
-                )
-                db.messages.flush(curs)
-                curs.connection.commit()
+            cls._do_expire(curs, expired)
+            db.messages.flush(curs)
+        curs.connection.commit()

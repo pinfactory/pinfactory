@@ -244,7 +244,7 @@ class MarketTestCase(unittest.TestCase):
         test_contract_type = testdb.contract_type(testissue, testmaturity).persist()
         test_contract_type.resolve(True)
         testdb.contract_type(testissue, testmaturity).persist()
-        test_contract_type.resolve(True)
+        _ = test_contract_type.resolve(True)
 
     def test_add_offer(self):
         "We can add a good offer and fail to add a bad offer."
@@ -276,7 +276,8 @@ class MarketTestCase(unittest.TestCase):
             testuser, test_contract_type, Market.FIXED, 500, 100, expires=datetime.now()
         )
         good_test_offer.place()
-        testdb.cleanup()
+        found = testdb.offer.filter(account=testuser)
+        self.assertEqual([], found)
         messages = testdb.history.filter(account=testuser)
         cancellation = messages[0]
         self.assertIn("cancelled", cancellation.text)
@@ -358,12 +359,13 @@ class MarketTestCase(unittest.TestCase):
         testuser = Account(balance=1000).persist(testdb)
         test_contract_type = self.make_contract_type(testdb)
         test_offer = testdb.offer(
-            testuser, test_contract_type, Market.FIXED, 100, 10, expires=datetime.now()
+            testuser, test_contract_type, Market.FIXED, 100, 10, expires=datetime.now() + timedelta(seconds=1)
         )
         mlist = test_offer.place()
         self.assertEqual(testuser.total, 1000)
         self.assertEqual(1, len(list(testdb.offer.filter(account=testuser))))
         testdb.conn.commit()
+        time.sleep(1)
         testdb = Market()
         testdb.cleanup()
         self.assertEqual([], list(testdb.offer.filter(account=testuser)))
@@ -1454,7 +1456,7 @@ class MarketTestCase(unittest.TestCase):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     demo_db = Market()
-    unittest.util._MAX_LENGTH = 2048
-    unittest.main(failfast=True)
+    unittest.util._MAX_LENGTH = 4096
+    unittest.main(failfast=True, verbosity=3)
 
 # vim: autoindent textwidth=100 tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
