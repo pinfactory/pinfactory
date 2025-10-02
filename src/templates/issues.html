@@ -15,9 +15,8 @@
             <tr>
               <th>Last activity</th>
 	      <th>Project</th>
-	      <th>Issue number</th>
+	      <th>Issue</th>
 	      <th>Offers total</th>
-	      <th>Description</th>
               <th>&nbsp;</th>
             </tr>
           </thead>
@@ -26,14 +25,13 @@
 		<tr{% if not issue.is_open %} class="text-muted"{% endif %}>
 		  <td>{{ issue.datetime }}</td>
 		  <td><a href="/issues?project={{ issue.projectname }}">{{ issue.projectname }}</a></td>
-  		  <td>{% if not issue.is_open %}<s>{% endif %} 		  
-		  	<a target="_blank" href="{{ issue.url }}">{{ issue.issuenumber }}
-		  {% if not issue.is_open %}</s>{% endif %} 
+          <td>{% if not issue.is_open %}<s>{% endif %}
+		  	<a target="_blank" href="{{ issue.url }}">{{ issue.issuenumber }} {{issue.displayname}}
+		  {% if not issue.is_open %}</s>{% endif %}
 		  </a></td>
 		  <td>{% if issue.offer_volume %}
 		  	{{ issue.offer_volume }}
 		  {% endif %}</td>
-  		  <td>{{ issue.displayname }}</td>
 		  <td><a class="btn btn-primary" href="/issue/{{ issue.id }}">Details</a></td>
 		</tr>
 {% endfor %}
