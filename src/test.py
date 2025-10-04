@@ -359,7 +359,12 @@ class MarketTestCase(unittest.TestCase):
         testuser = Account(balance=1000).persist(testdb)
         test_contract_type = self.make_contract_type(testdb)
         test_offer = testdb.offer(
-            testuser, test_contract_type, Market.FIXED, 100, 10, expires=datetime.now() + timedelta(seconds=1)
+            testuser,
+            test_contract_type,
+            Market.FIXED,
+            100,
+            10,
+            expires=datetime.now() + timedelta(seconds=1),
         )
         mlist = test_offer.place()
         self.assertEqual(testuser.total, 1000)

@@ -150,6 +150,31 @@ def localuser():
     return redirect(url_for("index"))
 
 
+@app.route("/agent/<uid>", methods=["GET"])
+def agent_user(uid):
+    try:
+        uid = int(uid)
+    except ValueError:
+        abort(404)
+    user = market.lookup_user(
+        host="local",
+        sub=uid,
+        username="agent_%d" % uid,
+        profile="http://localhost/agent/%d" % uid,
+        starting_balance=10_000,
+    )
+    user.persist(market)
+    session["host"] = user.host
+    session["sub"] = user.sub
+    return redirect(url_for("welcome_agent"))
+
+
+@app.route("/welcome_agent")
+def welcome_agent():
+    user = get_user()
+    return render_template("welcome_agent.html", user=user)
+
+
 @app.route("/timejump")
 def timejump():
     if "development" != app.config.get("ENV"):

@@ -4,6 +4,7 @@ conf/config.py
 # data (for local use only)
 data/
 src/db_dump.bak
+src/db_dump.sql
 
 # editor temp files
 *.swp

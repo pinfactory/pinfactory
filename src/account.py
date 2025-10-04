@@ -209,10 +209,11 @@ class Account(object):
             raise RuntimeError
 
     @classmethod
-    def lookup(cls, db, host, sub, username=None, profile=None):
+    def lookup(cls, db, host, sub, username=None, profile=None, starting_balance=0):
         """
         Look up an account. If it doesn't exist, create it.
         If username or profile are different, update them.
+        Starting balance is only applied if the account is new.
         """
         sub = str(sub)
         with db.conn.cursor() as curs:
@@ -222,6 +223,7 @@ class Account(object):
                 if username is None or profile is None:
                     raise NotImplementedError
                 acct = cls(host=host, sub=sub, username=username, profile=profile)
+                acct._balance = starting_balance
                 acct.persist(db)
                 curs.connection.commit()
                 return acct

@@ -209,13 +209,21 @@ class Offer(object):
             return None
 
     @classmethod
-    def filter(cls, oid=None, account=None, issue=None, include_private=False, db_cursor=None):
+    def filter(
+        cls, oid=None, account=None, issue=None, include_private=False, db_cursor=None
+    ):
         "Look up offers. This can be called with or without a database cursor."
-        if db_cursor is None: # Top level in this transaction
+        if db_cursor is None:  # Top level in this transaction
             db_cursor = cls.db.conn.cursor()
-            cls._do_expire(db_cursor) # remove any expired offers before searching
+            cls._do_expire(db_cursor)  # remove any expired offers before searching
             with db_cursor as curs:
-                result = cls.filter(oid=oid, account=account, issue=issue, include_private=include_private, db_cursor=curs)
+                result = cls.filter(
+                    oid=oid,
+                    account=account,
+                    issue=issue,
+                    include_private=include_private,
+                    db_cursor=curs,
+                )
                 cls.db.messages.flush(curs)
                 curs.connection.commit()
                 return result
@@ -434,7 +442,9 @@ class Offer(object):
     def _do_expire(cls, curs, oids_to_expire=None):
         if oids_to_expire is None:
             oids_to_expire = []
-        curs.execute("SELECT offer.id FROM offer WHERE expires IS NOT NULL AND expires <= NOW()")
+        curs.execute(
+            "SELECT offer.id FROM offer WHERE expires IS NOT NULL AND expires <= NOW()"
+        )
         for row in curs.fetchall():
             oids_to_expire.append(row[0])
         for oid in oids_to_expire:
