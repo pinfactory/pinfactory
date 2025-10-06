@@ -44,13 +44,13 @@ function setNumber(id, value, places) {
 function setLabels(side) {
 	if (side == "FIXED") {
 		document.getElementById('funder-before-label').innerHTML = "Your payment";
-		document.getElementById('fixer-before-label').innerHTML = "Funder's payment";
+		document.getElementById('fixer-before-label').innerHTML = "Other side's UNFIXED payment";
 	} else if (side == "UNFIXED") {
-		document.getElementById('funder-before-label').innerHTML = "Worker's payment";
+		document.getElementById('funder-before-label').innerHTML = "Other side's FIXED payment";
 		document.getElementById('fixer-before-label').innerHTML = "Your payment";
 	} else {
-		document.getElementById('funder-before-label').innerHTML = "Worker's payment";
-		document.getElementById('fixer-before-label').innerHTML = "Funder's payment";
+		document.getElementById('funder-before-label').innerHTML = "FIXED payment";
+		document.getElementById('fixer-before-label').innerHTML = "UNFIXED payment";
 	}
 	document.getElementById('funder-after-label').innerHTML = "";
 	document.getElementById('fixer-after-label').innerHTML = "";
@@ -155,13 +155,13 @@ function calculateFee() {
 	if ((quantity < 1) || (invest < 1)) {
 		return;
 	}
-	
+
 	var profit = quantity - invest;
 	var fee = Math.max(1, Math.round(profit * 0.1));
 	setNumber("detail-invest", invest, 0);
 	setNumber("fee", fee, 0);
 	setNumber("detail-fee", fee, 0);
-	setNumber("contract-payout", quantity - fee, 0)	
+	setNumber("contract-payout", quantity - fee, 0)
 	setNumber("contract-payout-dup", quantity - fee, 0)
 	var submitButton = document.getElementById('submit');
 	// var explain = document.getElementById('explain');
@@ -208,4 +208,3 @@ if (window.top.location != window.location) {
 	window.top.location = window.location;
 }
 window.addEventListener("load", setupFields, false);
-

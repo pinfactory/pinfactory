@@ -103,9 +103,7 @@ class Market(object):
             )
             curs.connection.commit()
 
-    def lookup_user(
-        self, host, sub, username=None, profile=None, starting_balance=0
-    ):
+    def lookup_user(self, host, sub, username=None, profile=None, starting_balance=0):
         # FIXME Transaction management
         try:
             return Account.lookup(self, host, sub, username, profile, starting_balance)

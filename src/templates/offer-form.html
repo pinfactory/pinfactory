@@ -13,25 +13,21 @@
 	{% endif %}
 
     <table width="100%"><tr><td>
-		<h3>Place an offer.</h3>
-		<p>Select FUND if you would like to fund the work on this issue, and select FIX if you would
-		  like to earn tokens when the issue is fixed.</p>
-        <p>Create offer to <select id="fund-fix">
-            <option value="">Select FUND or FIX</option>
-            <option value="FIXED">FIX</option>
-            <option value="UNFIXED">FUND</option>
+		<h3>1. Choose a side to invest in.</h3>
+		<p>You are offering to form a futures contract that will pay out or not depending on whether issue {{issue.id}} is fixed on a certain date.
+		Select FIXED to earn tokens if the issue is fixed by the maturity date, and select UNFIXED to earn tokens if the issue is not fixed.</p>
+        <p>Invest in the <select id="fund-fix">
+            <option value="">Select FIXED or UNFIXED</option>
+            <option value="FIXED">FIXED</option>
+            <option value="UNFIXED">UNFIXED</option>
         </select>
-        <a style="color: black; text-decoration: none" href="/issue/{{issue.id}}" target="_blank">issue {{ issue.issuenumber }}</a></p>
+        <a style="color: black; text-decoration: none" href="/issue/{{issue.id}}" target="_blank">side of issue {{ issue.issuenumber }}</a></p>
 
     </td></tr></table>
 
-    <table>
-        <tr><td id="fixer-before-label">Reward to worker</td><td><input id="funder-pays" size=5></td>
-            <td id="fixer-after-label">(if fixed)</td></tr>
-        <tr><td id="funder-before-label">Indemnity to be paid to funder</td><td><input id="worker-pays" size=5></td>
-            <td id="funder-after-label">(if unfixed)</td></tr>
-        <tr><td>Contract payout</td><td><input readonly="readonly" id="contract-payout" size=5></td><td></td></tr>
-    </table>
+	<h3>2. Choose a maturity date.</h3>
+
+	<p>If a contract is formed, it will be resolved on this date.</p>
 
     <table width="100%">
         <tr><th colspan="2">Matures on</th><th>&nbsp;</th></tr>
@@ -43,7 +39,18 @@
         </td></tr>
     </table>
 
+	<h3>3. Choose how many tokens you want to offer, and how many your counterparty will have to offer.</h3>
+    <table>
+        <tr><td class="offer-label" id="fixer-before-label">Payout for the FIXED side</td><td><input id="funder-pays" size=5></td>
+            <td id="fixer-after-label">(if fixed)</td></tr>
+        <tr><td class="offer-label" id="funder-before-label">Payout for the UNFIXED side</td><td><input id="worker-pays" size=5></td>
+            <td id="funder-after-label">(if unfixed)</td></tr>
+        <tr><td>Contract payout</td><td><input readonly="readonly" id="contract-payout" size=5></td><td></td></tr>
+    </table>
+
 	<p>&nbsp;</p>
+
+	<h3>4. Review your offer, then click <q>Place offer</q></h3>
 
     <p id="advanced">The offer is for {{ form.quantity(size=4) }} units of {{ form.side }} at a price of {{ form.price(size=5) }}
     with a maturity date of {{ form.maturitydate(size=10) }} {{ form.maturity }}.
@@ -64,8 +71,12 @@
         {{ form.submit(class_="btn btn-primary btn-lg") }}
     </p>
 
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+
+
 	<p><tt>market offer
-		--side=<span id="cmd-side">_</span> 
+		--side=<span id="cmd-side">_</span>
 		--quantity=<span id="cmd-quantity">NaN</span>
 		--price=<span id="cmd-price">NaN</span>
 		--iid={{issue.id}}
