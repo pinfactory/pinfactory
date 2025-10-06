@@ -220,10 +220,3 @@ INSERT INTO account (system, balance) SELECT true, 0
 -- create the default project  if it does not exist
 INSERT INTO project (url) VALUES ('https://github.com/pinfactory/pinfactory')
 	ON CONFLICT (url) DO NOTHING;
-
--- all done
-INSERT INTO message (class, recipient, message)
-	VALUES ('system', (SELECT id FROM account WHERE system = true),
-	'Database setup run.');
-
-SELECT * FROM message;
