@@ -16,11 +16,8 @@
 		<h3>1. Choose a side to invest in.</h3>
 		<p>You are offering to form a futures contract that will pay out or not depending on whether issue {{issue.id}} is fixed on a certain date.
 		Select FIXED to earn tokens if the issue is fixed by the maturity date, and select UNFIXED to earn tokens if the issue is not fixed.</p>
-        <p>Invest in the <select id="fund-fix">
-            <option value="">Select FIXED or UNFIXED</option>
-            <option value="FIXED">FIXED</option>
-            <option value="UNFIXED">UNFIXED</option>
-        </select>
+        {{form.side}}
+
         <a style="color: black; text-decoration: none" href="/issue/{{issue.id}}" target="_blank">side of issue {{ issue.issuenumber }}</a></p>
 
     </td></tr></table>
@@ -29,42 +26,28 @@
 
 	<p>If a contract is formed, it will be resolved on this date.</p>
 
-    <table width="100%">
-        <tr><th colspan="2">Matures on</th><th>&nbsp;</th></tr>
-        <tr><td colspan="2">
-            {% for maturity in maturities %}
-            <button id="maturity-{{ maturity.id }}" type="button" title="{{ maturity.display }}"
-                    class="btn btn-primary">{{ maturity.display }}</button>
-            {% endfor %}
-        </td></tr>
-    </table>
+	{{ form.maturity }}
 
-	<h3>3. Choose how many tokens you want to offer, and how many your counterparty will have to offer.</h3>
-    <table>
-        <tr><td class="offer-label" id="fixer-before-label">Payout for the FIXED side</td><td><input id="funder-pays" size=5></td>
-            <td id="fixer-after-label">(if fixed)</td></tr>
-        <tr><td class="offer-label" id="funder-before-label">Payout for the UNFIXED side</td><td><input id="worker-pays" size=5></td>
-            <td id="funder-after-label">(if unfixed)</td></tr>
-        <tr><td>Contract payout</td><td><input readonly="readonly" id="contract-payout" size=5></td><td></td></tr>
-    </table>
+	<h3>3. Choose a quantity and price.</h3>
+
+	<p>Quantity {{ form.quantity(size=4) }}</p>
+	<p>Price {{ form.price(size=5) }}</p>
 
 	<p>&nbsp;</p>
 
 	<h3>4. Review your offer, then click <q>Place offer</q></h3>
 
-    <p id="advanced">The offer is for {{ form.quantity(size=4) }} units of {{ form.side }} at a price of {{ form.price(size=5) }}
-    with a maturity date of {{ form.maturitydate(size=10) }} {{ form.maturity }}.
-	<span class="nobr">Estimated fee: <input id="fee" readonly="readonly" size="3"></input>.</span></p>
 
     <div id="win-loss-explain">
-	  <p>If this issue is <span id="other-side-dup">resolved as a loss</span> on <b id="maturity-dup-1">the maturity date</b>:
-	  You will lose your payment of <input id="detail-invest" readonly="readonly" size="4"></input> tokens.</p>
+	  <p>If this issue is <span id="other-side-dup">resolved as a loss</span> on <span id="maturity-dup-1">the maturity date</span>:
+	  You will lose your payment of <span id="detail-invest">_</span> tokens.</p>
 
-      <p>If this issue is <span id="this-side-dup">resolved as a win</span> on <b id="maturity-dup-2">the maturity date</b>:
-	  You will receive the contract payout of <input readonly="readonly" size="5" id="contract-payout-dup"></input> tokens,
+      <p>If this issue is <span id="this-side-dup">resolved as a win</span> on <span id="maturity-dup-2">the maturity date</span>:
+	  You will receive the contract payout of <span id="contract-payout">_</span> tokens,
 	  <span class="nobr">which reflects a transaction fee of
-	  <input id="detail-fee" readonly="readonly" size="3"></input> tokens,</span>
+	  <span id="detail-fee">_</span> tokens,</span>
 	  calculated based on 10% of your anticipted profit.</p>
+      <p>You may cancel this offer at any time until it is accepted. If part of this offer is accepted, you may cancel the remaining part.</p>
 	</div>
 
     <p>

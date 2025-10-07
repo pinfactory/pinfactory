@@ -142,7 +142,7 @@ def localuser():
         host="local", sub=sub, username=username, profile="http://localhost/%d" % sub
     )
     user.oracle = is_oracle
-    user.persist(market)
+    user.persist(market)  # FIXME: do we need this?
     session["host"] = user.host
     session["sub"] = user.sub
     flash("Made a new local account: %s." % username)
@@ -161,9 +161,8 @@ def agent_user(uid):
         sub=uid,
         username="agent_%d" % uid,
         profile="http://localhost/agent/%d" % uid,
-        starting_balance=10_000,
+        starting_balance=100_000,
     )
-    user.persist(market)
     session["host"] = user.host
     session["sub"] = user.sub
     return redirect(url_for("welcome_agent"))
@@ -316,7 +315,6 @@ def issue_page(iid):
         messages=messages,
     )
 
-
 @app.route("/fakeissue")
 def fakeissue():
     if "development" != app.config.get("ENV"):
@@ -334,7 +332,9 @@ def offer_page(iid):
         iid = int(iid)
     except:
         return redirect(url_for("issues"))
-    form = OfferForm()
+    maturities = market.maturities()
+    form = OfferForm(maturities=maturities)
+
     user = get_user()
     dest_url = "/offer/" + str(iid)
     if request.args:
@@ -359,7 +359,6 @@ def offer_page(iid):
     if not form.maturity.data and session.get("maturity"):
         form.maturity.data = session.get("maturity")
 
-    maturities = market.maturities()
     offers = market.offer.filter(issue=issue)
     for offer in offers:
         offer.cancel_button = cancel_button(user, offer)
@@ -381,7 +380,8 @@ def offer():
     """
     This gets called when the offer form is submitted with data.
     """
-    form = OfferForm()
+    maturities = market.maturities()
+    form = OfferForm(maturities=maturities)
     try:
         iid = int(form.issue.data)
     except:

@@ -25,8 +25,14 @@ class OfferForm(FlaskForm):
     submit = SubmitField("Place offer")
     issue = HiddenField("issue")
     issuename = StringField("issuename", render_kw={"readonly": True})
-    maturitydate = StringField("maturitydate", render_kw={"readonly": True})
-    maturity = HiddenField("maturity")
+    maturity = SelectField("maturity", choices=[("", "Select one")], validators=[DataRequired()])
+
+    def __init__(self, maturities=None):
+        super().__init__()
+        mlist = [("", "Select a maturity date")]
+        for m in maturities:
+            mlist.append((m.id, m.display))
+        self.maturity.choices = mlist
 
 
 class ResolveForm(FlaskForm):

@@ -603,6 +603,9 @@ COPY public.account (id, enabled, system, banker, oracle, balance, min_balance) 
 7	t	f	f	f	1000000	0
 4	t	f	f	f	980000	0
 8	t	f	f	f	0	0
+18	t	f	f	f	100000	0
+19	t	f	f	f	100000	0
+13	t	f	f	f	10000	0
 \.
 
 
@@ -816,6 +819,8 @@ COPY public.message (id, class, created, delivered, recipient, contract_type, si
 163	contract_resolved	2025-02-08 13:31:22.451384	\N	11	43	t	0	150	Contract resolved: FAQ (26) with maturity 78 at 08 Feb for a payout of 0 tokens	\N
 164	contract_resolved	2025-02-08 13:31:22.451384	\N	2	43	f	1000	145	Contract resolved: FAQ (26) with maturity 78 at 08 Feb for a payout of 145 tokens	\N
 173	system	2025-10-02 14:05:55.495157	\N	1	\N	\N	\N	\N	Database setup run.	\N
+175	new_account	2025-10-06 00:51:15.021609	\N	1	\N	\N	\N	\N	New account 13 created: local 1000	\N
+176	new_account	2025-10-06 13:06:22.352374	\N	1	\N	\N	\N	\N	New account 13 created: local 1000	\N
 139	system	2024-12-28 14:42:40.774474	\N	1	\N	\N	\N	\N	Issue created: https://github.com/pinfactory/pinfactory/issues/26	\N
 143	contract_created	2024-12-28 14:44:47.753624	\N	2	40	t	100	100	Contract formed: 100 units of FIXED FAQ (26) with maturity 77 at 25 Jan 2025 at a (fixed) price of 0.100	\N
 144	contract_created	2024-12-28 14:44:47.753624	\N	9	40	f	100	100	Contract formed: 100 units of UNFIXED FAQ (26) with maturity 77 at 25 Jan 2025 at a (fixed) price of 0.100	\N
@@ -841,6 +846,12 @@ COPY public.message (id, class, created, delivered, recipient, contract_type, si
 170	offer_cancelled	2025-08-09 06:25:01.876385	\N	2	49	t	100	100	Offer cancelled: 100 units of FIXED on Security review. (11) with maturity 91 at 09 Aug at a (fixed) price of 0.100	\N
 171	info	2025-08-09 06:25:01.876385	\N	2	\N	\N	\N	\N	An offer from you has been cancelled because the maturity date is in the past.	\N
 136	system	2024-12-26 19:15:03.595954	\N	1	\N	\N	\N	\N	Database setup run.	\N
+174	system	2025-10-04 17:52:05.9669	\N	1	\N	\N	\N	\N	Database setup run.	\N
+177	new_account	2025-10-06 15:20:04.998926	\N	1	\N	\N	\N	\N	New account 15 created: local 31337	\N
+178	new_account	2025-10-06 15:20:04.998926	\N	1	\N	\N	\N	\N	New account 16 created: local 31337	\N
+179	new_account	2025-10-06 15:20:04.998926	\N	1	\N	\N	\N	\N	New account 17 created: local 31337	\N
+180	new_account	2025-10-06 15:20:04.998926	\N	1	\N	\N	\N	\N	New account 18 created: local 31337	\N
+181	new_account	2025-10-06 15:20:05.018464	\N	1	\N	\N	\N	\N	New account 19 created: local 5100601	\N
 \.
 
 
@@ -881,10 +892,13 @@ COPY public.userid (id, account, host, sub, username, profile) FROM stdin;
 5	6	GitHub	9271195	HDauven	https://github.com/HDauven
 6	7	GitHub	7009200	MariusTH	https://github.com/MariusTH
 7	8	GitHub	124433287	f198200100	https://github.com/f198200100
+28	18	local	31337	agent_31337	http://localhost/agent/31337
+29	19	local	5100601	agent_5100601	http://localhost/agent/5100601
 8	9	local	1001	trading bot	https://market.pinfactory.org/bots
 21	10	GitHub	10239434	mickbransfield	https://github.com/mickbransfield
 22	11	GitHub	67113663	jimmyceroneii	https://github.com/jimmyceroneii
 23	12	GitHub	121135798	ODO15	https://github.com/ODO15
+24	13	local	1000	agent_1000	http://localhost/agent/1000
 \.
 
 
@@ -892,7 +906,7 @@ COPY public.userid (id, account, host, sub, username, profile) FROM stdin;
 -- Name: account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.account_id_seq', 12, true);
+SELECT pg_catalog.setval('public.account_id_seq', 19, true);
 
 
 --
@@ -920,7 +934,7 @@ SELECT pg_catalog.setval('public.maturity_id_seq', 98, true);
 -- Name: message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.message_id_seq', 173, true);
+SELECT pg_catalog.setval('public.message_id_seq', 181, true);
 
 
 --
@@ -941,14 +955,14 @@ SELECT pg_catalog.setval('public.position_id_seq', 8, true);
 -- Name: project_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.project_id_seq', 23, true);
+SELECT pg_catalog.setval('public.project_id_seq', 24, true);
 
 
 --
 -- Name: userid_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.userid_id_seq', 23, true);
+SELECT pg_catalog.setval('public.userid_id_seq', 29, true);
 
 
 --

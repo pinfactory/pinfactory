@@ -108,7 +108,9 @@ class Market(object):
         try:
             return Account.lookup(self, host, sub, username, profile, starting_balance)
         except Exception as e:
-            raise
+            logging.error("Error looking up user: %s" % e)
+            self.conn.rollback()
+            return self.lookup_user(host, sub, username, profile, starting_balance)
 
     def cleanup(self, contract_types=[]):
         Offer.cleanup(self, contract_types)
