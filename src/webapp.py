@@ -315,6 +315,7 @@ def issue_page(iid):
         messages=messages,
     )
 
+
 @app.route("/fakeissue")
 def fakeissue():
     if "development" != app.config.get("ENV"):
@@ -357,7 +358,8 @@ def offer_page(iid):
     ):
         form.side.data = session.get("side")
     if not form.maturity.data and session.get("maturity"):
-        form.maturity.data = session.get("maturity")
+        mid = str(session.get("maturity"))
+        form.maturity.data = mid
 
     offers = market.offer.filter(issue=issue)
     for offer in offers:

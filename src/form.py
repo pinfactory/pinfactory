@@ -25,7 +25,9 @@ class OfferForm(FlaskForm):
     submit = SubmitField("Place offer")
     issue = HiddenField("issue")
     issuename = StringField("issuename", render_kw={"readonly": True})
-    maturity = SelectField("maturity", choices=[("", "Select one")], validators=[DataRequired()])
+    maturity = SelectField(
+        "maturity", choices=[("", "Select one")], validators=[DataRequired()]
+    )
 
     def __init__(self, maturities=None):
         super().__init__()
