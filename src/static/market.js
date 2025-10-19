@@ -82,6 +82,12 @@ function doRecalculate() {
 	document.getElementById('this-side-dup').innerHTML = thisSideText;
 	document.getElementById('other-side-dup').innerHTML = otherSideText;
 	document.getElementById('win-loss-explain').style.visibility = 'visible';
+	el = document.getElementById("cmd-side");
+	el.innerHTML = side;
+  setNumber("cmd-price", price, 0);
+  setNumber("cmd-quantity", quantity, 0);
+  var mid = document.getElementById("maturity").value;
+  setNumber("cmd-mid", mid, 0);
 }
 
 function setupFields() {
