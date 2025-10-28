@@ -103,6 +103,25 @@ Log in with GitHub
 https://market.pinfactory.org/github/auth
 
 
+Troubleshooting
+---------------
+
+**Postgres primary key sequence out of sync?** The `id` column in some tables is a `SERIAL PRIMARY KEY`.
+This can cause `psycopg2.errors.UniqueViolation` exceptions.
+
+To check for errors:
+
+```
+SELECT MAX(id) FROM the_table;
+SELECT nextval(pg_get_serial_sequence('the_table', 'id'));
+```
+
+If the first value is higher than the second, the sequence needs to be reset.
+
+```
+SELECT setval(pg_get_serial_sequence('the_table', 'id'), (SELECT MAX(id) FROM the_table) + 1);
+```
+
 References
 ----------
 
